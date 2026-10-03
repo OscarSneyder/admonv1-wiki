@@ -1,0 +1,48 @@
+@startuml
+!include estilo.iuml
+title RNF-03 · Integridad: una solicitud por unidad privada y convocatoria (EUV-Q-03)
+actor Residente
+box "Frontend · SPA React" #ADD8E6
+  participant "CreateApplicationPage /\nuseCreateApplication" as UI
+  participant "CreateApplication +\napplications.api" as API
+end box
+box "Backend · Spring Boot" #90EE90
+  participant "ApplicationController" as CTRL
+  participant "ApplicationServiceImpl\n(@Transactional)" as SVC
+  participant "ApplicationRepository /\nDocumentRepository (JPA)" as REPO
+end box
+box "Infraestructura" #D3D3D3
+  database "Base de datos (H2)\nuk_application_apartment_call" as DB
+end box
+
+Residente -> UI : Confirma la solicitud con los documentos cargados
+UI -> API : execute({convocationId, residentId, documentIds})
+API -> CTRL : POST /api/applications + Bearer\n{callId, residentId, documentIds}
+CTRL -> SVC : createApplication(request, email del JWT)
+note right of SVC : El residente se obtiene del JWT;\nresidentId del cuerpo se ignora
+SVC -> REPO : Valida convocatoria, residente y unidad privada (apartamento)
+SVC -> REPO : existsByApartmentIdAndCallId(apartamento, convocatoria)
+REPO -> DB : SELECT
+alt Ya existe una solicitud (validación previa)
+  SVC --> API : 409 Conflict APPLICATION_ALREADY_EXISTS
+  API --> UI : throw "Error creating application: 409"
+  UI --> Residente : "Error al registrar la postulación." (mensaje genérico)
+else No existe
+  SVC -> REPO : Valida documentos: existen, UPLOADED y obligatorios completos
+  SVC -> REPO : save(Application REGISTERED, POST-<UUID>)\nsaveAll(documentos vinculados)
+  REPO -> DB : INSERT application
+  alt Inserción exitosa
+    DB --> REPO : OK
+    SVC --> API : 200 OK ApiResponse<ApplicationResponseDTO>
+    API --> UI : Solicitud creada
+    UI --> Residente : Muestra la confirmación
+  else Solicitud simultánea del mismo apartamento
+    DB --> REPO : Violación de restricción única
+    REPO --> SVC : DataIntegrityViolationException
+    SVC --> API : 500 (sin manejador; ver R-06)
+    API --> UI : throw "Error creating application: 500"
+    UI --> Residente : "Error al registrar la postulación." (mensaje genérico)
+  end
+end
+note over DB : La restricción única garantiza 0 duplicados;\nla respuesta esperada (409) aún no está implementada.
+@enduml

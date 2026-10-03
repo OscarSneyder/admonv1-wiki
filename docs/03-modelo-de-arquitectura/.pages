@@ -1,0 +1,9 @@
+title: 03 · Modelo de arquitectura
+nav:
+  - README.md
+  - 01-drivers-arquitectonicos.md
+  - Modelo de comunicación: 02-modelo-de-comunicacion
+  - Mecanismos de diseño: 03-mecanismos-de-diseno
+  - Decisiones (ADR): 04-decisiones-adr
+  - ...
+  - Diseño detallado: 08-diseno-detallado

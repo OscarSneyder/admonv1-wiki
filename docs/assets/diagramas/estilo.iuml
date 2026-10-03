@@ -1,0 +1,13 @@
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam participantBackgroundColor #E8E8F4
+skinparam participantBorderColor #7A7A99
+skinparam actorBorderColor #333333
+skinparam sequenceLifeLineBorderColor #999999
+skinparam noteBackgroundColor #FFF8DC
+skinparam noteBorderColor #C9A227
+skinparam sequenceGroupBorderColor #333333
+skinparam sequenceBoxBorderColor #7A7A99
+autonumber

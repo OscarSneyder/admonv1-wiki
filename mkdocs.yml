@@ -1,0 +1,61 @@
+site_name: ADMON v1 — Wiki
+site_description: Documentación del Sistema de Administración de Conjuntos Residenciales de Propiedades Horizontales
+site_url: https://oscarsneyder.github.io/admonv1-wiki/
+repo_url: https://github.com/OscarSneyder/admonv1-wiki
+repo_name: OscarSneyder/admonv1-wiki
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: es
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle: { icon: material/weather-night, name: Modo oscuro }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle: { icon: material/weather-sunny, name: Modo claro }
+
+plugins:
+  - search:
+      lang: es
+  - awesome-pages   # menú generado desde las carpetas; títulos en los archivos .pages
+
+markdown_extensions:
+  - tables
+  - admonition
+  - attr_list
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify { kwds: { case: lower } }  # anclas con tildes, igual que GitHub
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.superfences
+
+# Archivos propios de la GitHub Wiki: no se publican como páginas
+exclude_docs: |
+  _Sidebar.md
+  _Footer.md
+  .gitkeep
+
+not_in_nav: |
+  /assets/**
+
+validation:
+  omitted_files: info
+  links:
+    not_found: warn
+    anchors: warn

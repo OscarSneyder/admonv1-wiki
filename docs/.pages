@@ -1,0 +1,13 @@
+nav:
+  - Inicio: README.md
+  - 00-proyecto
+  - 01-modelo-de-negocio
+  - 02-modelo-de-capacidades
+  - 03-modelo-de-arquitectura
+  - 04-modelo-de-validacion
+  - 05-ejecucion-y-evidencia
+  - 06-direccion-y-planeacion
+  - 07-codigo-y-despliegue
+  - 08-gobierno
+  - plantillas
+  - Contribuir: CONTRIBUIR.md

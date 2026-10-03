@@ -1,0 +1,51 @@
+@startuml
+!include estilo.iuml
+title RNF-04 · Desplegabilidad: despliegue in-place verificado (EUV-Q-04, MEC-04)
+actor Desarrollador
+box "GitHub" #F5F5F5
+  participant "ByteCscript/\nadmonv1-backend" as GH
+end box
+box "AWS · CI/CD" #ADD8E6
+  participant "CodePipeline" as CP
+  participant "CodeBuild\nBuild" as CBB
+  participant "CodeBuild\nTest" as CBT
+  participant "CodeDeploy" as CD
+end box
+box "Amazon EC2 (instancia persistente)" #90EE90
+  participant "CodeDeploy Agent\n(hooks appspec.yml)" as AG
+  participant "Docker\n(contenedor backend)" as DK
+  participant "Nginx :443" as NG
+end box
+
+Desarrollador -> GH : Merge develop → main
+GH -> CP : Evento de cambio en main
+CP -> CBB : Source → Build
+CBB -> CBB : Maven: app.jar
+CBB --> CP : BuildArtifact (app.jar, Dockerfile,\nappspec.yml, deploy/, api-tests/)
+CP -> CBT : Test sobre el mismo BuildArtifact
+CBT -> CBT : Arranca app.jar (H2, aws.s3.key-prefix=ci-tests)\npytest test_api.py (health, login y flujo de solicitud)
+alt TEST FAIL
+  CBT --> CP : FAIL
+  CP -> CP : Pipeline detenido (no hay Deploy)
+else TEST PASS
+  CBT --> CP : PASS
+  CP -> CD : Deploy del mismo BuildArtifact
+  CD -> AG : Revisión → AES-Backend-Production
+  AG -> DK : BeforeInstall: docker stop/rm backend, docker rmi backend-app
+  note over NG, DK : Inicio de la ventana de indisponibilidad (ADR-0007, R-08):\nNginx no tiene backend al que redirigir
+  AG -> AG : Install: copia a /home/ec2-user/backend
+  AG -> DK : AfterInstall: docker build -t backend-app .
+  AG -> DK : ApplicationStart: docker run 127.0.0.1:8080\n(--restart unless-stopped, config montada en solo lectura)
+  AG -> DK : ValidateService: curl /api/health\n(hasta 50 intentos, 1 s entre intentos)
+  alt Backend responde
+    DK --> AG : 200 UP
+    AG --> CD : Hooks exitosos
+    CD --> CP : Deployment SUCCEEDED
+    note over NG, DK : Fin de la ventana: Nginx :443 → 127.0.0.1:8080
+  else Sin respuesta
+    AG -> AG : docker logs backend
+    AG --> CD : exit 1
+    CD --> CP : Deployment FAILED
+  end
+end
+@enduml

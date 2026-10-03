@@ -1,0 +1,57 @@
+@startuml
+!include estilo.iuml
+title RNF-05 · Escalabilidad: carga directa de documentos a S3 con URL prefirmada (EUV-Q-05)
+actor Residente
+box "Frontend · SPA React" #ADD8E6
+  participant "DocumentUpload /\nuseDocumentUpload" as UI
+  participant "UploadDocument\n(caso de uso)" as UC
+  participant "documents.api\n(authenticatedFetch / XHR)" as API
+end box
+box "Backend · Spring Boot" #90EE90
+  participant "DocumentController" as CTRL
+  participant "DocumentServiceImpl" as SVC
+  participant "S3Presigner /\nS3Client" as SDK
+  participant "DocumentRepository\n(JPA)" as REPO
+end box
+box "Infraestructura" #D3D3D3
+  participant "AWS S3\naes-puj-documents" as S3
+  database "Base de datos\n(H2 en memoria)" as DB
+end box
+
+Residente -> UI : Selecciona el PDF de un tipo de documento
+UI -> UI : Valida en cliente: application/pdf y ≤ 2 MB
+UI -> UC : execute(documentType, file, onProgress)
+UC -> API : generatePresignedUrl(documentType, file)
+API -> CTRL : POST /api/documents/presigned-url\n{documentType, fileName, contentType, size} + Bearer
+CTRL -> SVC : generatePresignedUrl(request)
+SVC -> SVC : Valida tipo de documento, contentType y tamaño
+alt Solicitud inválida
+  SVC --> API : 400 INVALID_DOCUMENT_TYPE /\nINVALID_CONTENT_TYPE / FILE_TOO_LARGE
+  API --> UI : Error de carga
+else Solicitud válida
+  SVC -> REPO : save(Document PENDING, s3Key = documents/{id}/{archivo})
+  REPO -> DB : INSERT document
+  SVC -> SDK : presignPutObject(bucket, key, 5 min)
+  SDK --> SVC : URL prefirmada (firma local, sin llamada a S3)
+  SVC --> API : 200 OK {documentId, fileName, uploadUrl}
+  API -> S3 : PUT uploadUrl (binario PDF, sin JWT)\nprogreso vía XHR
+  S3 --> API : 200 OK
+  API -> CTRL : POST /api/documents/{documentId}/complete + Bearer
+  CTRL -> SVC : completeUpload(documentId)
+  SVC -> SDK : headObject(bucket, s3Key)
+  SDK -> S3 : HEAD objeto
+  alt El objeto existe
+    S3 --> SDK : Metadatos (tamaño, contentType)
+    SVC -> REPO : save(Document UPLOADED)
+    REPO -> DB : UPDATE document
+    SVC --> API : 200 OK DocumentResponseDTO
+    API --> UI : Documento cargado (documentId)
+    UI --> Residente : Muestra el documento como cargado
+  else El objeto no existe
+    S3 --> SDK : NoSuchKeyException
+    SVC --> API : 404 FILE_NOT_FOUND_IN_S3
+    API --> UI : Error de carga
+  end
+end
+note over UI, S3 : El binario nunca pasa por el backend. Los documentIds se envían después\nal registrar la solicitud (POST /api/applications, ver RNF-03).
+@enduml

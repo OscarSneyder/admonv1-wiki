@@ -1,0 +1,53 @@
+@startuml
+!include estilo.iuml
+title RNF-02 · Seguridad: autenticación JWT sin estado (EUV-Q-02)
+actor Residente
+box "Frontend · SPA React" #ADD8E6
+  participant "LoginPage /\nuseLogin" as UI
+  participant "Login\n(caso de uso)" as LoginUC
+  participant "HttpAuthRepository\n+ TokenStorage" as AuthRepo
+  participant "authenticatedFetch" as AF
+end box
+box "Backend · Spring Boot" #90EE90
+  participant "Spring Security\n(OAuth2 Resource Server)" as SEC
+  participant "AuthController /\nAuthService" as AUTH
+  participant "JwtService\n(JwtEncoder HS256)" as JWT
+  participant "Controlador protegido\n(Call/Application/Document)" as CTRL
+end box
+
+== Inicio de sesión (endpoint público /api/auth/**) ==
+Residente -> UI : Ingresa correo y contraseña
+UI -> LoginUC : execute({email, password})
+LoginUC -> AuthRepo : login(credenciales)
+AuthRepo -> SEC : POST /api/auth/login
+SEC -> AUTH : permitAll (sin validar token)
+AUTH -> AUTH : AuthenticationManager.authenticate()
+alt Credenciales válidas
+  AUTH -> JWT : generateToken(authentication)
+  JWT --> AUTH : JWT firmado (exp. 1 h)
+  AUTH --> AuthRepo : 200 OK ApiResponse {token, "Bearer", 3600}
+  AuthRepo -> AuthRepo : TokenStorage.save(token)\n(localStorage)
+  AuthRepo --> UI : Sesión iniciada
+else Credenciales inválidas
+  AUTH --> AuthRepo : Error de autenticación (sin token)
+  AuthRepo --> UI : throw "Authentication failed: <status>"
+end
+
+== Acceso a un recurso protegido ==
+UI -> AF : Solicitud a /api/** (ruta protegida por ProtectedRoute)
+alt No hay token almacenado
+  AF --> UI : throw "Authentication token not found"\n(no se envía la petición)
+else Token almacenado
+  AF -> SEC : GET/POST /api/...\nAuthorization: Bearer <jwt>
+  SEC -> SEC : JwtDecoder: valida firma HS256\ny expiración
+  alt Token válido
+    SEC -> CTRL : Petición autenticada (email = subject)
+    CTRL --> AF : 200 OK ApiResponse<T> (sin token)
+    AF --> UI : Datos del recurso
+  else Token inválido o expirado
+    SEC --> AF : 401 Unauthorized
+    AF --> UI : Error HTTP 401
+    note right of AF : El cliente no limpia el token\nni redirige al login ante un 401
+  end
+end
+@enduml

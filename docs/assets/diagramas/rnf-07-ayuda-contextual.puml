@@ -1,0 +1,32 @@
+@startuml
+!include estilo.iuml
+title RNF-07 · Usabilidad: ayuda contextual en convocatorias y solicitud
+actor Residente
+box "Frontend · SPA React" #ADD8E6
+  participant "Formulario de solicitud\n(CreateApplicationPage /\nDocumentUpload / ResidentInfo)" as FORM
+  participant "useDocumentTypes" as HOOK
+  participant "Tooltip\n(components/Tooltip.jsx)" as TT
+end box
+box "Backend · Spring Boot" #90EE90
+  participant "DocumentController" as CTRL
+end box
+
+== Carga del formulario ==
+FORM -> HOOK : Obtiene el catálogo de tipos de documento
+HOOK -> CTRL : GET /api/documents/types + Bearer
+CTRL --> HOOK : 200 OK [tipo, obligatorio, formato, maxSizeBytes]
+HOOK --> FORM : documentTypes
+FORM -> TT : Renderiza Tooltip(text) junto a cada campo o acción
+note right of FORM
+  Texto de ayuda:
+  · estático, definido en cada componente, o
+  · construido con el catálogo
+    ("Formato: PDF. Tamaño máximo: … MB")
+  No existe un almacén central de textos.
+end note
+
+== Consulta de la ayuda ==
+Residente -> TT : Pasa el mouse sobre el botón "i"\no lo enfoca con el teclado (focus-visible)
+TT -> TT : CSS muestra el contenido role="tooltip"\n(aria-describedby)
+TT --> Residente : Despliega la ayuda junto al campo, sin llamadas al servidor
+@enduml
