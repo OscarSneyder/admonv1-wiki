@@ -22,7 +22,7 @@ Los resultados de ejecución se consolidan en [Ejecución y evidencia](../05-eje
 |----|-----|----------|-----------|-----------|--------|----------|
 | [EUV-Q-01](euv/EUV-Q-01-concurrencia-postulaciones.md) | RNF-01 | Rendimiento | 300 solicitudes concurrentes | (H, H) | 🟡 Parcial | ADR-0001, ADR-0005 |
 | [EUV-Q-02](euv/EUV-Q-02-acceso-no-autenticado.md) | RNF-02 | Seguridad | Acceso sin token a la API | (H, M) | 🟢 | ADR-0003 |
-| [EUV-Q-03](euv/EUV-Q-03-postulacion-duplicada.md) | RNF-03 | Integridad | Solicitud duplicada de la misma unidad privada | (H, M) | 🟡 Ante solicitudes simultáneas responde 500 ([R-06](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) | ADR-0005 |
+| [EUV-Q-03](euv/EUV-Q-03-postulacion-duplicada.md) | RNF-03 | Integridad | Solicitud duplicada de la misma unidad privada | (H, M) | 🟡 Sin restricción única en BD, las solicitudes simultáneas pueden quedar duplicadas ([R-09](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) | ADR-0005 |
 | [EUV-Q-04](euv/EUV-Q-04-despliegue-automatizado.md) | RNF-04 | Desplegabilidad | Merge de `develop` a `main` despliega automáticamente | (M, M) | 🟢 | ADR-0006 |
 | [EUV-Q-05](euv/EUV-Q-05-carga-documentos-s3.md) | RNF-05 | Escalabilidad | Carga de archivos sin pasar por la API | (M, M) | 🟢 | ADR-0004 |
 

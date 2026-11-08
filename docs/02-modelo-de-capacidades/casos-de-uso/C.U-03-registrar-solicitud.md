@@ -32,7 +32,7 @@
 | Paso | Actor / Sistema | Acción | Estado v1 |
 |:----:|-----------------|--------|-----------|
 | 1 | Residente | Ingresa al sistema | 🟢 Inicio de sesión con JWT |
-| 2 | Residente | Ingresa a la convocatoria y elige presentar una solicitud | 🟢 La opción solo está habilitada si la convocatoria tiene cupos disponibles (`availableSlots > 0`) |
+| 2 | Residente | Ingresa a la convocatoria y elige presentar una solicitud | 🟢 La opción solo está habilitada si la convocatoria tiene cupos disponibles (`availableSlots > 0`); antes de abrir el formulario el frontend verifica la elegibilidad (`GET /api/applications/check`) |
 | 3 | Residente | Ingresa sus datos de residente | 🟡 Los datos se muestran fijos (`constants.js`); no se capturan ni se consultan del backend |
 | 4 | Residente | Carga los documentos del vehículo y del residente (licencia de tránsito, SOAT y licencia de conducción obligatorios; revisión técnico-mecánica opcional) | 🟢 Carga directa a S3 ([RNF-05](../03-atributos-de-calidad-y-rnf.md#diagramas-de-secuencia-de-rnf)) |
 | 5 | Residente | Ingresa los datos de la unidad privada | 🟡 La unidad se toma del residente autenticado; no se ingresa |
@@ -55,8 +55,8 @@
 | Código | Paso | Condición | Respuesta del sistema | Regla | Estado v1 |
 |--------|:----:|-----------|-----------------------|-------|-----------|
 | FE-01 | 7 | El residente no está a paz y salvo | Rechaza la solicitud e informa que debe estar a paz y salvo. Fin | [RN-16](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar) | 🔴 No implementado |
-| FE-02 | 8 | La unidad privada ya tiene una solicitud en la convocatoria | Rechaza la solicitud por múltiple inscripción (`409 APPLICATION_ALREADY_EXISTS`). Fin | [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟡 Implementado; ante solicitudes simultáneas responde 500 ([R-06](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) y el frontend muestra un mensaje genérico |
-| FE-03 | 2 | La convocatoria no tiene cupos disponibles | No habilita la solicitud. Fin | — | 🟡 Se evalúa `availableSlots > 0`; el estado `OPEN/CLOSED` no se considera |
+| FE-02 | 8 | La unidad privada ya tiene una solicitud en la convocatoria | Rechaza la solicitud por múltiple inscripción (`409 APPLICATION_ALREADY_EXISTS`). Fin | [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟡 Implementado, pero solo cuenta las solicitudes `REGISTERED` y ya no hay restricción única en BD: dos solicitudes simultáneas pueden quedar duplicadas ([R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
+| FE-03 | 2 | La convocatoria no tiene cupos disponibles | No habilita la solicitud. Fin | — | 🟡 El frontend evalúa `availableSlots > 0`. El backend rechaza solicitudes en convocatorias cerradas manualmente (`409 CALL_CLOSED`, [RN-29](../../01-modelo-de-negocio/04-reglas-de-negocio.md)), pero no por fechas. El commit `b9a98a1` de `develop` agrega la validación por fechas y por cupos, pero no compila ([R-10](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
 | FE-04 | 6 | La convocatoria no existe (`CALL_NOT_FOUND`) | Rechaza la solicitud. Fin | [RN-01](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟢 |
 | FE-05 | 6 | El residente no tiene unidad privada asociada (`APARTMENT_NOT_FOUND`) | Rechaza la solicitud. Fin | [RN-03](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟢 |
 | FE-06 | 4 | El archivo no es PDF (`INVALID_CONTENT_TYPE`) | Rechaza el archivo | [RN-08](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟢 |
@@ -81,7 +81,7 @@ RN-01, RN-03 a RN-13 y RN-16 ([Reglas de negocio](../../01-modelo-de-negocio/04-
 ## EUV asociados
 | EUV | Flujo que demuestra | Estado |
 |-----|---------------------|--------|
-| [EUV-03](../../04-modelo-de-validacion/euv/EUV-03-verificar-elegibilidad.md) | Verificación previa de única participación (paso 8, FE-02) | Implementado solo en el backend; el frontend no la invoca |
+| [EUV-03](../../04-modelo-de-validacion/euv/EUV-03-verificar-elegibilidad.md) | Verificación previa de única participación (paso 8, FE-02) | Implementado; el frontend la invoca desde el detalle de la convocatoria |
 | [EUV-04](../../04-modelo-de-validacion/euv/EUV-04-cargar-documentos.md) | Paso 4, FA-02, FE-06 a FE-08 | Implementado |
 | [EUV-05](../../04-modelo-de-validacion/euv/EUV-05-registrar-postulacion.md) | Flujo básico, FE-02, FE-04, FE-05, FE-09, FE-10 | Implementado |
 | [EUV-Q-01](../../04-modelo-de-validacion/euv/EUV-Q-01-concurrencia-postulaciones.md) | Flujo básico bajo concurrencia | Implementado |

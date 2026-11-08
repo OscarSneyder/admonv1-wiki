@@ -24,7 +24,7 @@ El software es un **habilitador necesario** del servicio: la necesidad exige con
 
 | Necesidad de control | Cómo la atiende el producto | Referencia |
 |----------------------|-----------------------------|------------|
-| Una sola solicitud por unidad privada y convocatoria | Regla de negocio y restricción única en base de datos | [RN-04](../01-modelo-de-negocio/04-reglas-de-negocio.md), [EUV-Q-03](../04-modelo-de-validacion/euv/EUV-Q-03-postulacion-duplicada.md) |
+| Una sola solicitud por unidad privada y convocatoria | Regla de negocio (⚠️ la restricción única en base de datos se retiró el 2026-10-02, [R-09](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) | [RN-04](../01-modelo-de-negocio/04-reglas-de-negocio.md), [EUV-Q-03](../04-modelo-de-validacion/euv/EUV-Q-03-postulacion-duplicada.md) |
 | Documentos obligatorios del vehículo completos y válidos | Validación de tipo, tamaño y obligatoriedad | [RN-06 a RN-11](../01-modelo-de-negocio/04-reglas-de-negocio.md), [EUV-04](../04-modelo-de-validacion/euv/EUV-04-cargar-documentos.md) |
 | Cupos y periodicidad propios de cada conjunto | Parámetros definidos en cada convocatoria | [RN-14, RN-15](../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar), [C.U-01](../02-modelo-de-capacidades/casos-de-uso/C.U-01-publicar-convocatoria.md) |
 | Estado y trazabilidad de cada solicitud hasta la asignación | Estados de la solicitud, número único `POST-<UUID>` y sorteo registrado | [RN-13](../01-modelo-de-negocio/04-reglas-de-negocio.md), [C.U-07](../02-modelo-de-capacidades/casos-de-uso/C.U-07-aceptar-solicitud.md), [C.U-08](../02-modelo-de-capacidades/casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) |
@@ -33,7 +33,7 @@ El software es un **habilitador necesario** del servicio: la necesidad exige con
 | ID | Valor esperado | Elemento del modelo | Evidencia de mejora (medida) | EUV | Estado |
 |----|----------------|---------------------|------------------------------|-----|--------|
 | OBJ-01 | Gestionar en línea las solicitudes a convocatorias de parqueadero comunal | [C.U-03 Registrar solicitud](../02-modelo-de-capacidades/casos-de-uso/C.U-03-registrar-solicitud.md) | 100 % de las solicitudes de la convocatoria piloto registradas en ADMON, sin recepción por canales alternos | [EUV-05](../04-modelo-de-validacion/euv/EUV-05-registrar-postulacion.md) | 🟢 Implementado · ✏️ sin evidencia |
-| OBJ-02 | Garantizar una solicitud por unidad privada y convocatoria | [RN-04](../01-modelo-de-negocio/04-reglas-de-negocio.md) · RNF-03 | 0 duplicados (restricción `uk_application_apartment_call`) | [EUV-Q-03](../04-modelo-de-validacion/euv/EUV-Q-03-postulacion-duplicada.md) | 🟢 Implementado · ✏️ sin evidencia |
+| OBJ-02 | Garantizar una solicitud por unidad privada y convocatoria | [RN-04](../01-modelo-de-negocio/04-reglas-de-negocio.md) · RNF-03 | 0 duplicados | [EUV-Q-03](../04-modelo-de-validacion/euv/EUV-Q-03-postulacion-duplicada.md) | 🟡 Solo validación en el servicio; sin restricción única en BD desde 2026-10-02 ([R-09](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) · ✏️ sin evidencia |
 | OBJ-03 | Asegurar documentos obligatorios del vehículo | [RN-07](../01-modelo-de-negocio/04-reglas-de-negocio.md) | 100 % de solicitudes con documentos obligatorios | [EUV-05](../04-modelo-de-validacion/euv/EUV-05-registrar-postulacion.md) | 🟢 Implementado · ✏️ sin evidencia |
 | OBJ-04 | Soportar picos de concurrencia al abrir convocatorias | RNF-01 | p95 < 2 s y errores < 1 % con 300 usuarios concurrentes | [EUV-Q-01](../04-modelo-de-validacion/euv/EUV-Q-01-concurrencia-postulaciones.md) | 🟡 p95 cumple; tasa de fallo 16,7 % no cumple |
 | OBJ-05 | Asegurar la trazabilidad de la asignación | [C.U-07](../02-modelo-de-capacidades/casos-de-uso/C.U-07-aceptar-solicitud.md), [C.U-08](../02-modelo-de-capacidades/casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) | 100 % de las solicitudes con historial de estados consultable, desde el registro hasta la asignación | ✏️ EUV por crear | 🔴 No implementado |
@@ -45,7 +45,7 @@ La RBS cubre de extremo a extremo el escenario ESN-01 ([RBS](../06-direccion-y-p
 
 | Caso de uso | Escenario de servicio | Implementado en v1 | RBS |
 |-------------|-----------------------|:------------------:|:---:|
-| [C.U-01 Publicar convocatoria](../02-modelo-de-capacidades/casos-de-uso/C.U-01-publicar-convocatoria.md) | ESN-01 · paso 1 | ❌ | ✅ |
+| [C.U-01 Publicar convocatoria](../02-modelo-de-capacidades/casos-de-uso/C.U-01-publicar-convocatoria.md) | ESN-01 · paso 1 | 🟡 Sin periodo de vigencia (RN-15) | ✅ |
 | [C.U-02 Consultar convocatoria](../02-modelo-de-capacidades/casos-de-uso/C.U-02-consultar-convocatoria.md) | ESN-01 · paso 3 | ✅ | ✅ |
 | [C.U-03 Registrar solicitud](../02-modelo-de-capacidades/casos-de-uso/C.U-03-registrar-solicitud.md) | ESN-01 · paso 4 | 🟡 Sin validación de paz y salvo (RN-16) | ✅ |
 | [C.U-04 Consultar solicitud](../02-modelo-de-capacidades/casos-de-uso/C.U-04-consultar-solicitud.md) | — | 🟡 Residente | ✅ |
@@ -53,7 +53,8 @@ La RBS cubre de extremo a extremo el escenario ESN-01 ([RBS](../06-direccion-y-p
 | [C.U-08 Ejecutar sorteo de cupos](../02-modelo-de-capacidades/casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) | ESN-01 · paso 7 | ❌ | ✅ |
 | Autenticación (JWT) | Transversal | ✅ | ✅ |
 | Notificaciones ([MEC-05](../03-modelo-de-arquitectura/03-mecanismos-de-diseno/README.md)) | ESN-01 · pasos 2 y 5 | ❌ | ✅ |
-| [C.U-05 Ajustar solicitud](../02-modelo-de-capacidades/casos-de-uso/C.U-05-ajustar-solicitud.md), [C.U-06 Cancelar solicitud](../02-modelo-de-capacidades/casos-de-uso/C.U-06-cancelar-solicitud.md), [C.U-09 Configurar zona común](../02-modelo-de-capacidades/casos-de-uso/C.U-09-configurar-zona-comun.md) | — | ❌ | Diferidos |
+| [C.U-06 Cancelar solicitud](../02-modelo-de-capacidades/casos-de-uso/C.U-06-cancelar-solicitud.md) | — | ✅ | Diferido |
+| [C.U-05 Ajustar solicitud](../02-modelo-de-capacidades/casos-de-uso/C.U-05-ajustar-solicitud.md), [C.U-09 Configurar zona común](../02-modelo-de-capacidades/casos-de-uso/C.U-09-configurar-zona-comun.md) | — | ❌ | Diferidos |
 | ESN-02 y servicios SN-01 a SN-05, SN-07, SN-08 | — | ❌ | Fuera del alcance |
 
 ## 6. Incertidumbres

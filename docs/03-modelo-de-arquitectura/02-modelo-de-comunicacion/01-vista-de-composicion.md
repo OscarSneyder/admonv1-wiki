@@ -4,7 +4,7 @@
 | Elemento | Responsabilidad | Interfaz |
 |----------|-----------------|----------|
 | Residente | Usuario final | Navegador web |
-| Administrador | Gestiona convocatorias, solicitudes y sorteo (C.U-01, C.U-07, C.U-08, C.U-09) | Navegador web (por implementar) |
+| Administrador | Gestiona convocatorias, solicitudes y sorteo (C.U-01, C.U-07, C.U-08, C.U-09) | Navegador web: convocatorias implementadas (`/admin/convocations`); solicitudes y sorteo por implementar |
 | ADMON v1 | Sistema bajo diseño | HTTPS / REST |
 | AWS S3 | Almacenamiento de objetos | API S3 |
 | AWS CodePipeline | Integración y despliegue continuos | Fuente GitHub `ByteCscript/admonv1-backend`, rama `main` ([Pipeline CI/CD](../../07-codigo-y-despliegue/02-pipeline-ci-cd.md)) |

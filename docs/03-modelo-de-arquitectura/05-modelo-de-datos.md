@@ -8,7 +8,7 @@ Fuente: entidades JPA en `model/` (esquema generado con `ddl-auto=create`) y dat
 ## Restricciones relevantes
 | Restricción | Tabla | Propósito |
 |------------|-------|-----------|
-| `uk_application_apartment_call (apartment_id, call_id)` | applications | RN-04: una solicitud por unidad privada y convocatoria |
+| `uk_application_apartment_call (apartment_id, call_id)` | applications | RN-04: una solicitud por unidad privada y convocatoria. ⚠️ Retirada el 2026-10-02 (R-09) |
 | `application_number` único | applications | Identificador legible |
 | `s3_key` único | documents | Un objeto S3 por documento |
 | `email` único | users | Identidad de login |

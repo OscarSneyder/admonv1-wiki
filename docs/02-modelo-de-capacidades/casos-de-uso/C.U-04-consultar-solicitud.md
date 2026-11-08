@@ -26,7 +26,7 @@
 | Paso | Actor / Sistema | Acción | Estado v1 |
 |:----:|-----------------|--------|-----------|
 | 1 | Residente | Ingresa a la opción de sus solicitudes | 🟢 `/mis-postulaciones` |
-| 2 | Sistema | Muestra las solicitudes del residente, de la más reciente a la más antigua | 🟡 `GET /api/applications` (10 por página, sin controles de paginación en la interfaz). ⚠️ Hoy lista todas las solicitudes, no solo las del residente ([R-01](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
+| 2 | Sistema | Muestra las solicitudes del residente, de la más reciente a la más antigua | 🟡 `GET /api/applications` (10 por página, sin controles de paginación en la interfaz). ⚠️ El frontend envía `residentId = 1` fijo (`constants.js`), así que cualquier usuario ve las solicitudes del residente 1; el backend no filtra por el usuario del token ([R-01](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
 | 3 | Residente | Selecciona una solicitud | 🟢 |
 | 4 | Sistema | Muestra el detalle de la solicitud con su estado y documentos. Fin | 🟡 `GET /api/applications/{applicationId}`; no valida que la solicitud pertenezca al residente (R-01) |
 

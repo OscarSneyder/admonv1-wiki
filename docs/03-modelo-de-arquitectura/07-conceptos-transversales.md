@@ -37,7 +37,7 @@ Todas las respuestas usan el *record* `ApiResponse<T>`:
 | 401 | Sin token o token inválido |
 | 404 | Recurso inexistente (`CALL_NOT_FOUND`, `DOCUMENT_NOT_FOUND`, …) |
 | 409 | Conflicto (`APPLICATION_ALREADY_EXISTS`) |
-| 500 | Error no controlado; hoy ocurre ante una violación de la restricción única por solicitudes simultáneas ([R-06](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
+| 500 | Error no controlado. Antes ocurría ante una violación de la restricción única por solicitudes simultáneas; la restricción se retiró ([R-09](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
 
 Catálogo completo de códigos: [Reglas de negocio](../01-modelo-de-negocio/04-reglas-de-negocio.md).
 

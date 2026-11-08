@@ -27,7 +27,7 @@
 | 2 | Sistema | Muestra las convocatorias con título, vigencia, cupos y estado | 🟢 `GET /api/calls` |
 | 3 | Residente | Selecciona una convocatoria | 🟢 |
 | 4 | Sistema | Muestra el detalle de la convocatoria con ayuda contextual sobre cupos y estado | 🟢 `GET /api/calls/{callId}`, componente `Tooltip` |
-| 5 | Sistema | Habilita la opción de presentar una solicitud. Fin | 🟢 Habilitada si `availableSlots > 0` |
+| 5 | Sistema | Habilita la opción de presentar una solicitud. Fin | 🟢 Habilitada si `availableSlots > 0`; antes de continuar consulta la elegibilidad (`GET /api/applications/check`) |
 
 ## Flujos alternativos
 | Código | Paso de origen | Condición | Acción | Retorno |
@@ -39,7 +39,7 @@
 |--------|:----:|-----------|-----------------------|-----------|
 | FE-01 | 2 | No hay convocatorias registradas | Muestra "No hay convocatorias disponibles." Fin | 🟢 |
 | FE-02 | 4 | La convocatoria no existe (`CALL_NOT_FOUND`) | Muestra un mensaje de error. Fin | 🟢 |
-| FE-03 | 5 | La convocatoria no tiene cupos disponibles | No habilita la opción de presentar una solicitud. Fin | 🟡 El estado `OPEN/CLOSED` no se evalúa |
+| FE-03 | 5 | La convocatoria no tiene cupos disponibles | No habilita la opción de presentar una solicitud. Fin | 🟡 La lista deshabilita la opción si la convocatoria está cerrada manualmente; el detalle solo evalúa `availableSlots > 0`. Ninguno considera las fechas ([RN-25](../../01-modelo-de-negocio/04-reglas-de-negocio.md)) |
 | FE-04 | 2, 4 | El token no es válido o expiró (401) | Muestra un mensaje de error; no redirige al inicio de sesión | 🟡 Ver [RNF-02](../03-atributos-de-calidad-y-rnf.md#diagramas-de-secuencia-de-rnf) |
 
 ## Reglas de negocio aplicables

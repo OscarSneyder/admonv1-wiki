@@ -1,5 +1,7 @@
 # EUV-Q-03 · Integridad: solicitud duplicada de la misma unidad privada
 
+> ⚠️ **Desactualizado (revisión del código, 2026-11-07):** la restricción `uk_application_apartment_call` descrita abajo se retiró el 2026-10-02 al implementar la cancelación ([C.U-06](../../02-modelo-de-capacidades/casos-de-uso/C.U-06-cancelar-solicitud.md)). Hoy la unicidad depende solo del servicio, que cuenta las solicitudes `REGISTERED`, y no está garantizada ante solicitudes simultáneas ([R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)).
+
 | Parte del QAS | Descripción |
 |---------------|-------------|
 | **Fuente** | Dos residentes de la misma unidad privada (o doble clic del mismo residente) |

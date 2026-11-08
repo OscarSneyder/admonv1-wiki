@@ -11,7 +11,7 @@ Se necesita persistencia relacional con restricciones de integridad (unicidad de
 - Spring Data JPA / Hibernate como capa de persistencia.
 - **H2 en memoria** con `ddl-auto=create` y `data.sql` para desarrollo y para las pruebas API en CodeBuild.
 - **PostgreSQL** como motor objetivo (dependencia y propiedades preparadas pero comentadas en `pom.xml` y `application.properties`).
-- Integridad reforzada con la restricción `uk_application_apartment_call`.
+- Integridad reforzada con la restricción `uk_application_apartment_call`. ⚠️ Retirada el 2026-10-02 al implementar la cancelación (R-09).
 
 ## Consecuencias
 - ➕ Arranque inmediato y datos semilla reproducibles.

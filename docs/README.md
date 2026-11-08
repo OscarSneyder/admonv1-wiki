@@ -1,6 +1,6 @@
 # Wiki del Proyecto ADMON v1 — Sistema de Administración de Conjuntos Residenciales de Propiedades Horizontales
 
-> **Estado del documento:** 🟡 En construcción · **Versión wiki:** 0.1.0 · **Última actualización:** 2026-09-27
+> **Estado del documento:** 🟡 En construcción · **Versión wiki:** 0.1.0 · **Última actualización:** 2026-11-07
 > **Repositorios:** [admonv1-backend](https://github.com/ByteCscript/admonv1-backend) · [admonv1-frontend](https://github.com/ByteCscript/admonv1-frontend)
 
 En su primera versión, ADMON permite a los residentes de un conjunto residencial consultar **convocatorias** de parqueaderos comunales, **cargar los documentos** del vehículo y **registrar su postulación**, garantizando una sola postulación por apartamento y convocatoria.

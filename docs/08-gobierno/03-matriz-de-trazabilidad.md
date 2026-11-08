@@ -26,7 +26,7 @@ Conecta cada requisito con su escenario, los componentes que lo implementan, el 
 | RF-08, RF-09 | EUV-06 | `ApplicationsPage`, `ApplicationDetailPage` | `ApplicationController`, `ApplicationSpecification` | `GET /api/applications[/{id}]` | 0001 | e2e |
 | RNF-01 | EUV-Q-01 | — | Backend completo | `POST /api/applications` | 0004, 0005 | k6 300 VU 🟡 |
 | RNF-02 | EUV-Q-02 | `ProtectedRoute`, `authenticatedFetch` | `SecurityConfig`, `JwtConfig` | todos | 0003 | ✏️ |
-| RNF-03 | EUV-Q-03 | — | `ApplicationServiceImpl`, restricción única | `POST /api/applications` | 0005 | ✏️ |
+| RNF-03 | EUV-Q-03 | — | `ApplicationServiceImpl` (⚠️ restricción única retirada, R-09) | `POST /api/applications` | 0005 | ✏️ |
 | RNF-04 | EUV-Q-04 | — | `buildspec*.yml`, `appspec.yml`, `deploy/` | `/api/health` | 0006 | pipeline ✅ |
 | RNF-05 | EUV-Q-05 | `useDocumentUpload` | `DocumentServiceImpl` | `/api/documents/**` | 0004 | ✏️ |
 

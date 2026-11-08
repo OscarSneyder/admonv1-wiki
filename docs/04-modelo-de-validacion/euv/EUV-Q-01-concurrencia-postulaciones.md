@@ -27,7 +27,7 @@
 
 ## Tácticas arquitectónicas relacionadas
 - Carga de archivos fuera de la API (ADR-0004), para que la solicitud solo lleve metadatos.
-- Restricción única en BD como control ante la concurrencia (ADR-0005).
+- Restricción única en BD como control ante la concurrencia (ADR-0005). ⚠️ Retirada el 2026-10-02 (R-09).
 - ✏️ Pool de conexiones, índices, escalado horizontal.
 
 ## Evidencias
