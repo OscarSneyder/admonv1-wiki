@@ -30,7 +30,7 @@
 | 1 | Administrador | Ingresa a *Administrar Convocatorias* | 🟢 `/admin/convocations`, visible solo para `ROLE_ADMIN` |
 | 2 | Sistema | Muestra las convocatorias con su estado (Abierta, Programada o Cerrada) y sus acciones | 🟢 `GET /api/calls` |
 | 3 | Administrador | Elige crear una convocatoria | 🟢 `/admin/convocations/new` |
-| 4 | Administrador | Ingresa título, descripción, fecha de inicio, fecha de fin y cupos disponibles | 🟢 Formulario `CallForm` |
+| 4 | Administrador | Ingresa título, descripción, fecha de inicio, fecha de fin y número de cupos | 🟢 Formulario `CallForm` |
 | 5 | Administrador | Ingresa el periodo de vigencia de la asignación | 🔴 No implementado ([RN-15](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar)): el modelo no tiene el campo |
 | 6 | Sistema | Valida los datos ([RN-22](../../01-modelo-de-negocio/04-reglas-de-negocio.md)) | 🟢 |
 | 7 | Sistema | Registra la convocatoria y calcula su estado derivado. Fin | 🟢 `POST /api/calls` |
@@ -40,7 +40,7 @@
 |--------|:--------------:|-----------|--------|---------|-----------|
 | FA-01 | 2 | El administrador desea modificar una convocatoria | Edita los datos; el sistema los valida (sin exigir fecha de inicio futura) y guarda | Paso 2 | 🟢 `PUT /api/calls/{callId}`; botón deshabilitado si la convocatoria está cerrada manualmente |
 | FA-02 | 2 | El administrador desea cerrar una convocatoria antes de su fecha de fin | El sistema marca el cierre manual; la convocatoria queda `CLOSED` y no admite solicitudes | Paso 2 | 🟢 `PATCH /api/calls/{callId}/close` |
-| FA-03 | 2 | El administrador desea reabrir una convocatoria cerrada manualmente | El sistema retira el cierre manual y recalcula el estado por fechas | Paso 2 | 🟢 `PATCH /api/calls/{callId}/reopen`. ⚠️ Falta impedirlo si la convocatoria ya fue sorteada ([RN-19](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar)) |
+| FA-03 | 2 | El administrador desea reabrir una convocatoria cerrada manualmente | El sistema retira el cierre manual y recalcula el estado por fechas | Paso 2 | 🟢 `PATCH /api/calls/{callId}/reopen`; se rechaza si la convocatoria ya fue sorteada (`409 DRAW_ALREADY_EXECUTED`, [RN-19](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar)) |
 | FA-04 | 2 | El administrador desea eliminar una convocatoria | El sistema pide confirmación y la elimina | Paso 2 | 🟢 `DELETE /api/calls/{callId}`, modal de confirmación |
 
 ## Flujos de excepción

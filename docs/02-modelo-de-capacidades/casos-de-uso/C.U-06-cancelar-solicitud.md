@@ -18,18 +18,18 @@
 
 ## Precondiciones
 1. El residente inició sesión ([EUV-01](../../04-modelo-de-validacion/euv/EUV-01-iniciar-sesion.md)).
-2. El residente tiene una solicitud en estado `REGISTERED`.
+2. El residente tiene una solicitud en estado `PENDING_VALIDATION`.
 3. La fecha actual está dentro del periodo de la convocatoria.
 
 ## Postcondiciones
 1. La solicitud queda en estado `CANCELLED`.
-2. La unidad privada puede volver a presentar una solicitud en la misma convocatoria, porque [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) solo cuenta las solicitudes `REGISTERED`. Para permitirlo, este mismo commit retiró la restricción única `uk_application_apartment_call` (ver [R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)).
+2. La unidad privada puede volver a presentar una solicitud en la misma convocatoria, porque [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) no cuenta las solicitudes `CANCELLED`. Para permitirlo, este mismo commit retiró la restricción única `uk_application_apartment_call` (ver [R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)).
 
 ## Flujo básico
 | Paso | Actor / Sistema | Acción | Estado v1 |
 |:----:|-----------------|--------|-----------|
 | 1 | Residente | Consulta el detalle de su solicitud ([C.U-04](C.U-04-consultar-solicitud.md)) | 🟢 `/applications/:id` |
-| 2 | Sistema | Muestra la opción *Cancelar postulación* si la solicitud está `REGISTERED` y la convocatoria está dentro de su periodo | 🟢 |
+| 2 | Sistema | Muestra la opción *Cancelar postulación* si la solicitud está `PENDING_VALIDATION` y la convocatoria está dentro de su periodo | 🟢 |
 | 3 | Residente | Elige cancelar | 🟢 |
 | 4 | Sistema | Pide confirmación | 🟢 Modal de confirmación |
 | 5 | Residente | Confirma | 🟢 |
@@ -46,7 +46,7 @@
 |--------|:----:|-----------|-----------------------|-------|-----------|
 | FE-01 | 6 | La solicitud no existe | Rechaza (`APPLICATION_NOT_FOUND`). Fin | — | 🟢 |
 | FE-02 | 6 | La solicitud pertenece a otro residente | Rechaza (`APPLICATION_FORBIDDEN`). Fin | RN-26 | 🟢 El residente se toma del JWT |
-| FE-03 | 6 | La solicitud no está `REGISTERED` | Rechaza (`APPLICATION_CANNOT_BE_CANCELLED`). Fin | RN-27 | 🟢 |
+| FE-03 | 6 | La solicitud no está `PENDING_VALIDATION` | Rechaza (`APPLICATION_CANNOT_BE_CANCELLED`). Fin | RN-27 | 🟢 |
 | FE-04 | 6 | La fecha actual está fuera del periodo de la convocatoria | Rechaza (`APPLICATION_PERIOD_CLOSED`). Fin | RN-28 | 🟢 |
 
 ## Reglas de negocio aplicables

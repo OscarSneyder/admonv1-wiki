@@ -8,7 +8,7 @@
 | Servicio de negocio | [SN-06](../../01-modelo-de-negocio/05-servicios-de-negocio.md) Reservación de zonas comunes |
 | Escenario de servicio | ESN-01 · paso 4 |
 | Objetivo del actor | Presentar una solicitud a la convocatoria de parqueadero comunal para participar en la asignación de cupos |
-| Resultado observable | Solicitud registrada en la base de participantes, con número único y estado `REGISTERED` |
+| Resultado observable | Solicitud registrada en la base de participantes, con número único y estado `PENDING_VALIDATION` |
 | Requisitos funcionales relacionados | RF-04, RF-05, RF-06, RF-07 |
 | Estado | 🟡 Implementado parcialmente (ver columna *Estado v1*) |
 
@@ -20,11 +20,11 @@
 
 ## Precondiciones
 1. El residente inició sesión ([EUV-01](../../04-modelo-de-validacion/euv/EUV-01-iniciar-sesion.md)).
-2. Existe una convocatoria con cupos disponibles ([C.U-02](C.U-02-consultar-convocatoria.md)).
+2. Existe una convocatoria abierta ([C.U-02](C.U-02-consultar-convocatoria.md)).
 3. El residente tiene una unidad privada asociada.
 
 ## Postcondiciones
-1. La solicitud queda registrada en estado `REGISTERED`, con número `POST-<UUID>` y fecha de creación.
+1. La solicitud queda registrada en estado `PENDING_VALIDATION`, con número `POST-<UUID>` y fecha de creación.
 2. Los documentos cargados quedan vinculados a la solicitud.
 3. La unidad privada no puede registrar otra solicitud en la misma convocatoria.
 
@@ -32,7 +32,7 @@
 | Paso | Actor / Sistema | Acción | Estado v1 |
 |:----:|-----------------|--------|-----------|
 | 1 | Residente | Ingresa al sistema | 🟢 Inicio de sesión con JWT |
-| 2 | Residente | Ingresa a la convocatoria y elige presentar una solicitud | 🟢 La opción solo está habilitada si la convocatoria tiene cupos disponibles (`availableSlots > 0`); antes de abrir el formulario el frontend verifica la elegibilidad (`GET /api/applications/check`) |
+| 2 | Residente | Ingresa a la convocatoria y elige presentar una solicitud | 🟢 La opción solo está habilitada si la convocatoria está abierta (estado derivado `OPEN`); antes de abrir el formulario el frontend verifica la elegibilidad (`GET /api/applications/check`) |
 | 3 | Residente | Ingresa sus datos de residente | 🟡 Los datos se muestran fijos (`constants.js`); no se capturan ni se consultan del backend |
 | 4 | Residente | Carga los documentos del vehículo y del residente (licencia de tránsito, SOAT y licencia de conducción obligatorios; revisión técnico-mecánica opcional) | 🟢 Carga directa a S3 ([RNF-05](../03-atributos-de-calidad-y-rnf.md#diagramas-de-secuencia-de-rnf)) |
 | 5 | Residente | Ingresa los datos de la unidad privada | 🟡 La unidad se toma del residente autenticado; no se ingresa |
@@ -55,8 +55,8 @@
 | Código | Paso | Condición | Respuesta del sistema | Regla | Estado v1 |
 |--------|:----:|-----------|-----------------------|-------|-----------|
 | FE-01 | 7 | El residente no está a paz y salvo | Rechaza la solicitud e informa que debe estar a paz y salvo. Fin | [RN-16](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar) | 🔴 No implementado |
-| FE-02 | 8 | La unidad privada ya tiene una solicitud en la convocatoria | Rechaza la solicitud por múltiple inscripción (`409 APPLICATION_ALREADY_EXISTS`). Fin | [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟡 Implementado, pero solo cuenta las solicitudes `REGISTERED` y ya no hay restricción única en BD: dos solicitudes simultáneas pueden quedar duplicadas ([R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
-| FE-03 | 2 | La convocatoria no tiene cupos disponibles | No habilita la solicitud. Fin | — | 🟡 El frontend evalúa `availableSlots > 0`. El backend rechaza solicitudes en convocatorias cerradas manualmente (`409 CALL_CLOSED`, [RN-29](../../01-modelo-de-negocio/04-reglas-de-negocio.md)), pero no por fechas. El commit `b9a98a1` de `develop` agrega la validación por fechas y por cupos, pero no compila ([R-10](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
+| FE-02 | 8 | La unidad privada ya tiene una solicitud en la convocatoria | Rechaza la solicitud por múltiple inscripción (`409 APPLICATION_ALREADY_EXISTS`). Fin | [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟡 Implementado; cuenta las solicitudes `PENDING_VALIDATION` y `APPROVED`, pero ya no hay restricción única en BD: dos solicitudes simultáneas pueden quedar duplicadas ([R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) |
+| FE-03 | 2 | La convocatoria no está abierta (`SCHEDULED` o `CLOSED`) | No habilita la solicitud. Si la solicitud llega al backend, la rechaza (`409 CALL_CLOSED`). Fin | [RN-25, RN-29](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟢 Los cupos no limitan el registro de solicitudes ([modelo de cupos](../../01-modelo-de-negocio/04-reglas-de-negocio.md#modelo-de-cupos)) |
 | FE-04 | 6 | La convocatoria no existe (`CALL_NOT_FOUND`) | Rechaza la solicitud. Fin | [RN-01](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟢 |
 | FE-05 | 6 | El residente no tiene unidad privada asociada (`APARTMENT_NOT_FOUND`) | Rechaza la solicitud. Fin | [RN-03](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟢 |
 | FE-06 | 4 | El archivo no es PDF (`INVALID_CONTENT_TYPE`) | Rechaza el archivo | [RN-08](../../01-modelo-de-negocio/04-reglas-de-negocio.md) | 🟢 |

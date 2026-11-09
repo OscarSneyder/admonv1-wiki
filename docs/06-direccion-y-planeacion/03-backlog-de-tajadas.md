@@ -4,8 +4,8 @@
 | Tajada | Objetivo | C.U / EUV incluidos | Riesgo que reduce | Prioridad | Estado |
 |--------|----------|---------------------|-------------------|-----------|--------|
 | TJ-01 | Asegurar y evidenciar lo implementado | C.U-04 (R-01: listado y detalle restringidos al residente del JWT); evidencia de `test_create_application_end_to_end` (EUV-01 a EUV-06); EUV-Q-01 con 300 residentes semilla | Técnica: seguridad y rendimiento | 1 | 🔴 Pendiente |
-| TJ-02 | Publicar convocatorias y validar solicitudes | C.U-01 (RN-14, RN-15), C.U-07; EUV por crear | Negocio: validación por el administrador y estados | 2 | 🟡 En curso: C.U-01 implementado (sin RN-15); C.U-07 pendiente |
-| TJ-03 | Asignar cupos por sorteo y notificar | C.U-08, MEC-05; EUV por crear | Negocio: reglas y aceptación del sorteo; completa la RBS | 3 | 🔴 Pendiente |
+| TJ-02 | Publicar convocatorias y validar solicitudes | C.U-01 (RN-14, RN-15), C.U-07; EUV por crear | Negocio: validación por el administrador y estados | 2 | 🟡 En curso: C.U-01 implementado (sin RN-15); C.U-07 implementado, con D-11 y los EUV pendientes |
+| TJ-03 | Asignar cupos por sorteo y notificar | C.U-08, MEC-05; EUV por crear | Negocio: reglas y aceptación del sorteo; completa la RBS | 3 | 🟡 En curso: C.U-08 implementado; faltan MEC-05 (notificaciones) y los EUV |
 
 ## Evolución diferida del pipeline
 Prevista en [ADR-0007](../03-modelo-de-arquitectura/04-decisiones-adr/ADR-0007-despliegue-in-place-ec2-persistente.md) si aparecen requisitos más fuertes de disponibilidad, escalabilidad o despliegue sin interrupción:

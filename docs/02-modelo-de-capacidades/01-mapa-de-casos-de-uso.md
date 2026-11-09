@@ -14,8 +14,8 @@
 | [C.U-04](casos-de-uso/C.U-04-consultar-solicitud.md) | Consultar solicitud | Solicitudes · Convocatorias | Residente, Administrador | — | RF-08, RF-09 (Residente) | 🟡 Implementado para Residente |
 | [C.U-05](casos-de-uso/C.U-05-ajustar-solicitud.md) | Ajustar solicitud | Solicitudes | Residente | — | — | 🔴 No implementado |
 | [C.U-06](casos-de-uso/C.U-06-cancelar-solicitud.md) | Cancelar solicitud | Solicitudes | Residente | — | RF-14 | 🟢 Implementado (fuera de la RBS) |
-| [C.U-07](casos-de-uso/C.U-07-aceptar-solicitud.md) | Aceptar solicitud | Convocatorias | Administrador | ESN-01 · paso 6 | — | 🔴 No implementado |
-| [C.U-08](casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) | Ejecutar sorteo de cupos | Convocatorias | Administrador | ESN-01 · paso 7 | RF-12, RF-13 | 🔴 No implementado |
+| [C.U-07](casos-de-uso/C.U-07-aceptar-solicitud.md) | Aceptar solicitud | Convocatorias | Administrador | ESN-01 · paso 6 | RF-15, RF-16, RF-17 | 🟡 Implementado, con limitaciones en el listado (D-11) |
+| [C.U-08](casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) | Ejecutar sorteo de cupos | Convocatorias | Administrador | ESN-01 · paso 7 | RF-12, RF-13 | 🟡 Implementado sin notificación (MEC-05) |
 | [C.U-09](casos-de-uso/C.U-09-configurar-zona-comun.md) | Configurar zona común | Configuraciones | Administrador | — | — | 🔴 No implementado |
 
 ## Capacidades transversales

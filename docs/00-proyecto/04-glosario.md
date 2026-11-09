@@ -2,7 +2,9 @@
 
 | Término (ES) | Término en código | Definición |
 |--------------|-------------------|-----------|
-| Convocatoria | `Call` (back) / `Convocation` (front) | Proceso abierto durante un rango de fechas con un número de cupos (`availableSlots`) para parqueaderos comunales. Estados: `OPEN`, `CLOSED`. |
+| Convocatoria | `Call` (back) / `Convocation` (front) | Proceso abierto durante un rango de fechas con un número de cupos (`totalSlots`) para parqueaderos comunales. Estados: `SCHEDULED`, `OPEN`, `CLOSED`. |
+| Cupos | `Call.totalSlots` | Número fijo de parqueaderos comunales que se asignan en una convocatoria. No cambia al registrar, aprobar o rechazar solicitudes, ni al ejecutar el sorteo. |
+| Asignación directa | `directAssignment` | Resultado del sorteo cuando las solicitudes aprobadas son iguales o menos que los cupos: todas quedan `SELECTED` y no hay lista de espera. |
 | Solicitud (en la implementación v1: Postulación) | `Application` | Solicitud de un residente, para su unidad privada (apartamento), a una convocatoria. Número con formato `POST-<UUID>`. |
 | Residente | `User` con `ROLE_RESIDENT` | Usuario asociado a un apartamento que puede postularse. |
 | Administrador | `User` con `ROLE_ADMIN` | Rol definido en los datos semilla; ✏️ funciones por definir. |

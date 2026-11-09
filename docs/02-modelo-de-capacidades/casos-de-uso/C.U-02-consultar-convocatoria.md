@@ -8,7 +8,7 @@
 | Servicio de negocio | [SN-06](../../01-modelo-de-negocio/05-servicios-de-negocio.md) Reservación de zonas comunes |
 | Escenario de servicio | ESN-01 · paso 3 |
 | Objetivo del actor | Conocer las convocatorias de parqueadero comunal y sus condiciones para decidir si presenta una solicitud |
-| Resultado observable | Listado de convocatorias y detalle de la convocatoria seleccionada (vigencia, cupos disponibles y estado) |
+| Resultado observable | Listado de convocatorias y detalle de la convocatoria seleccionada (vigencia, cupos y estado) |
 | Requisitos funcionales relacionados | RF-02, RF-03 |
 | Estado | 🟢 Implementado |
 
@@ -18,7 +18,7 @@
 1. El residente inició sesión ([EUV-01](../../04-modelo-de-validacion/euv/EUV-01-iniciar-sesion.md)).
 
 ## Postcondiciones
-1. El residente conoce las condiciones de la convocatoria; si tiene cupos disponibles, puede iniciar [C.U-03](C.U-03-registrar-solicitud.md).
+1. El residente conoce las condiciones de la convocatoria; si está abierta, puede iniciar [C.U-03](C.U-03-registrar-solicitud.md).
 
 ## Flujo básico
 | Paso | Actor / Sistema | Acción | Estado v1 |
@@ -27,7 +27,7 @@
 | 2 | Sistema | Muestra las convocatorias con título, vigencia, cupos y estado | 🟢 `GET /api/calls` |
 | 3 | Residente | Selecciona una convocatoria | 🟢 |
 | 4 | Sistema | Muestra el detalle de la convocatoria con ayuda contextual sobre cupos y estado | 🟢 `GET /api/calls/{callId}`, componente `Tooltip` |
-| 5 | Sistema | Habilita la opción de presentar una solicitud. Fin | 🟢 Habilitada si `availableSlots > 0`; antes de continuar consulta la elegibilidad (`GET /api/applications/check`) |
+| 5 | Sistema | Habilita la opción de presentar una solicitud. Fin | 🟢 Habilitada si el estado derivado es `OPEN`; antes de continuar consulta la elegibilidad (`GET /api/applications/check`) |
 
 ## Flujos alternativos
 | Código | Paso de origen | Condición | Acción | Retorno |
@@ -39,11 +39,11 @@
 |--------|:----:|-----------|-----------------------|-----------|
 | FE-01 | 2 | No hay convocatorias registradas | Muestra "No hay convocatorias disponibles." Fin | 🟢 |
 | FE-02 | 4 | La convocatoria no existe (`CALL_NOT_FOUND`) | Muestra un mensaje de error. Fin | 🟢 |
-| FE-03 | 5 | La convocatoria no tiene cupos disponibles | No habilita la opción de presentar una solicitud. Fin | 🟡 La lista deshabilita la opción si la convocatoria está cerrada manualmente; el detalle solo evalúa `availableSlots > 0`. Ninguno considera las fechas ([RN-25](../../01-modelo-de-negocio/04-reglas-de-negocio.md)) |
+| FE-03 | 5 | La convocatoria no está abierta (`SCHEDULED` o `CLOSED`) | No habilita la opción de presentar una solicitud. Fin | 🟢 Tanto la lista como el detalle usan el estado derivado ([RN-25](../../01-modelo-de-negocio/04-reglas-de-negocio.md)). En la lista, *Ver Detalles* se deshabilita en las convocatorias cerradas, salvo las ya sorteadas, para que el residente pueda consultar los resultados |
 | FE-04 | 2, 4 | El token no es válido o expiró (401) | Muestra un mensaje de error; no redirige al inicio de sesión | 🟡 Ver [RNF-02](../03-atributos-de-calidad-y-rnf.md#diagramas-de-secuencia-de-rnf) |
 
 ## Reglas de negocio aplicables
-[RN-01](../../01-modelo-de-negocio/04-reglas-de-negocio.md) · [RN-14](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar) (cupos por convocatoria).
+[RN-01](../../01-modelo-de-negocio/04-reglas-de-negocio.md) · [RN-14](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar) (cupos por convocatoria) · [RN-25](../../01-modelo-de-negocio/04-reglas-de-negocio.md) (estado derivado).
 
 ## RNF aplicables
 | RNF | Aplicación en este C.U |

@@ -5,7 +5,7 @@
 | Requisito | RF-07 |
 | Actor | Residente autenticado |
 | Precondiciones | Elegible (EUV-03) · documentos obligatorios en `UPLOADED` (EUV-04) |
-| Postcondición | `Application` en estado `REGISTERED`, número `POST-<UUID>`, documentos vinculados |
+| Postcondición | `Application` en estado `PENDING_VALIDATION`, número `POST-<UUID>`, documentos vinculados |
 | Pantalla | `/convocations/:id/apply` → `CreateApplicationPage` (`ApplicationStepper`) |
 | Endpoint | `POST /api/applications` — cuerpo `{callId, residentId, documentIds[]}` |
 | Componentes | Front: `useCreateApplication`, `CreateApplication`, `HttpApplicationRepository` · Back: `ApplicationController`, `ApplicationServiceImpl`, `ApplicationRepository`, `DocumentRepository`, `UserRepository`, `CallRepository` |
@@ -27,7 +27,7 @@
 | FE-10 | Faltan documentos obligatorios | `REQUIRED_DOCUMENTS_MISSING` |
 
 ## Criterios de aceptación
-- **Dado** un residente elegible con los 3 documentos obligatorios cargados, **cuando** confirma, **entonces** se crea la solicitud `REGISTERED`.
+- **Dado** un residente elegible con los 3 documentos obligatorios cargados, **cuando** confirma, **entonces** se crea la solicitud `PENDING_VALIDATION`.
 - **Dado** una unidad privada con solicitud previa, **cuando** intenta presentar una solicitud de nuevo, **entonces** recibe 409.
 
 ## Evidencias

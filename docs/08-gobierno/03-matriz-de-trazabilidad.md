@@ -8,6 +8,7 @@
 | SN-06 | ESN-01 | C.U-02 | — | MEC-01 | EUV-02 | ✏️ |
 | SN-06 | ESN-01 | C.U-03 | RNF-01, RNF-03, RNF-05 | MEC-02, MEC-03 | EUV-03, EUV-04, EUV-05, EUV-Q-01, EUV-Q-03, EUV-Q-05 | k6 (EUV-Q-01) 🟡 |
 | SN-06 | — | C.U-04 | RNF-02 | MEC-01 | EUV-06 | ✏️ |
+| SN-06 | ESN-01 | C.U-07 | RNF-02, RNF-03 | MEC-01 | ✏️ EUV por crear | `DrawIntegrationTest` y `DrawConcurrencyTest` (parcial) 🟡 |
 | — | — | — | RNF-04 | MEC-04 | EUV-Q-04 | Pipeline ✅ |
 
 ## Trazabilidad técnica
