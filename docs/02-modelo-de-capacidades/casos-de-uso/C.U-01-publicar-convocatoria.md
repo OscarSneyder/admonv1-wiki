@@ -14,7 +14,7 @@
 | Requisitos funcionales relacionados | RF-10 |
 | Estado | 🟡 Implementado parcialmente: falta el periodo de vigencia de la asignación (RN-15) |
 
-> **Fuente de los flujos:** implementación v1 (commit *feat: publish call CU 1.1.4*, 2026-10-29). Backend: `CallController`, `CallServiceImpl`. Frontend: `/admin/convocations`, `/admin/convocations/new`, `/admin/convocations/:id/edit`. La columna *Estado v1* compara cada paso con el código de `develop` (revisión 2026-11-07).
+> **Fuente de los flujos:** implementación v1 (commit *feat: publish call CU 1.1.4*, 2026-10-29). Backend: `CallController`, `CallServiceImpl`. Frontend: `/admin/convocations`, `/admin/convocations/new`, `/admin/convocations/:id/edit`. La columna *Estado v1* compara cada paso con el código de la rama `fix/integracion-aprobacion-sorteo` (revisión 2026-11-09).
 
 ## Precondiciones
 1. El administrador inició sesión con `ROLE_ADMIN` ([EUV-01](../../04-modelo-de-validacion/euv/EUV-01-iniciar-sesion.md)).
@@ -23,12 +23,14 @@
 1. La convocatoria queda registrada con título, descripción, fecha de inicio, fecha de fin y número de cupos.
 2. Su estado se deriva de las fechas y del cierre manual: `SCHEDULED` antes de la fecha de inicio, `OPEN` dentro del periodo y `CLOSED` después de la fecha de fin o si se cerró manualmente ([RN-25](../../01-modelo-de-negocio/04-reglas-de-negocio.md)).
 3. La convocatoria es visible para los residentes en [C.U-02](C.U-02-consultar-convocatoria.md).
+4. Una vez sorteada ([C.U-08](C.U-08-ejecutar-sorteo-de-cupos.md)), la convocatoria queda **bloqueada por completo**: no se puede modificar (ni siquiera el título), cerrar, reabrir ni eliminar ([RN-19](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar); decisión del equipo, 2026-11-09).
+5. La convocatoria nace sin solicitudes. El entorno de simulación masiva (`simulation.auto-enroll=true`, desactivado por defecto) preinscribiría a los usuarios `simulated` (`SimulationEnrollmentService`), pero los datos semilla actuales no tienen ninguno.
 
 ## Flujo básico
 | Paso | Actor / Sistema | Acción | Estado v1 |
 |:----:|-----------------|--------|-----------|
 | 1 | Administrador | Ingresa a *Administrar Convocatorias* | 🟢 `/admin/convocations`, visible solo para `ROLE_ADMIN` |
-| 2 | Sistema | Muestra las convocatorias con su estado (Abierta, Programada o Cerrada) y sus acciones | 🟢 `GET /api/calls` |
+| 2 | Sistema | Muestra las convocatorias con su estado (Abierta, Programada o Cerrada), la marca de *sorteada* y sus acciones (Editar, Cerrar/Reabrir, Sorteo, Eliminar) | 🟢 `GET /api/calls`, componente `AdminCallCard` |
 | 3 | Administrador | Elige crear una convocatoria | 🟢 `/admin/convocations/new` |
 | 4 | Administrador | Ingresa título, descripción, fecha de inicio, fecha de fin y número de cupos | 🟢 Formulario `CallForm` |
 | 5 | Administrador | Ingresa el periodo de vigencia de la asignación | 🔴 No implementado ([RN-15](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar)): el modelo no tiene el campo |
@@ -38,10 +40,11 @@
 ## Flujos alternativos
 | Código | Paso de origen | Condición | Acción | Retorno | Estado v1 |
 |--------|:--------------:|-----------|--------|---------|-----------|
-| FA-01 | 2 | El administrador desea modificar una convocatoria | Edita los datos; el sistema los valida (sin exigir fecha de inicio futura) y guarda | Paso 2 | 🟢 `PUT /api/calls/{callId}`; botón deshabilitado si la convocatoria está cerrada manualmente |
-| FA-02 | 2 | El administrador desea cerrar una convocatoria antes de su fecha de fin | El sistema marca el cierre manual; la convocatoria queda `CLOSED` y no admite solicitudes | Paso 2 | 🟢 `PATCH /api/calls/{callId}/close` |
+| FA-01 | 2 | El administrador desea modificar una convocatoria | Edita los datos; el sistema los valida (sin exigir fecha de inicio futura) y guarda | Paso 2 | 🟢 `PUT /api/calls/{callId}`; *Editar* se deshabilita si la convocatoria está cerrada manualmente o ya fue sorteada |
+| FA-02 | 2 | El administrador desea cerrar una convocatoria antes de su fecha de fin | El sistema marca el cierre manual; la convocatoria queda `CLOSED` y no admite solicitudes. Si ya estaba cerrada manualmente, responde con éxito sin cambios | Paso 2 | 🟢 `PATCH /api/calls/{callId}/close` (idempotente); *Cerrar* se deshabilita si la convocatoria ya fue sorteada y el backend lo rechaza (FE-06) |
 | FA-03 | 2 | El administrador desea reabrir una convocatoria cerrada manualmente | El sistema retira el cierre manual y recalcula el estado por fechas | Paso 2 | 🟢 `PATCH /api/calls/{callId}/reopen`; se rechaza si la convocatoria ya fue sorteada (`409 DRAW_ALREADY_EXECUTED`, [RN-19](../../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar)) |
 | FA-04 | 2 | El administrador desea eliminar una convocatoria | El sistema pide confirmación y la elimina | Paso 2 | 🟢 `DELETE /api/calls/{callId}`, modal de confirmación |
+| FA-05 | 2 | La convocatoria está cerrada (por fecha o manualmente) | El sistema ofrece la acción *Sorteo* (o *Ver sorteo* si ya se ejecutó) | [C.U-08](C.U-08-ejecutar-sorteo-de-cupos.md) | 🟢 `/admin/convocations/:id/draw` |
 
 ## Flujos de excepción
 | Código | Paso | Condición | Respuesta del sistema | Regla | Estado v1 |
@@ -50,8 +53,9 @@
 | FE-02 | 6 | Faltan fechas, la fecha de fin es anterior a la de inicio o, al crear, la fecha de inicio ya pasó | Rechaza (`400 CALL_INVALID_DATES`) | RN-22 | 🟢 |
 | FE-03 | 6 | Los cupos faltan o son menores que 1 | Rechaza (`400 CALL_INVALID_SLOTS`) | RN-22, RN-14 | 🟢 |
 | FE-04 | FA-01 a FA-04 | La convocatoria no existe | Rechaza (`404 CALL_NOT_FOUND`) | RN-01 | 🟢 |
+| FE-04a | FA-01 a FA-04 | El identificador de la convocatoria es nulo o menor que 1 | Rechaza (`400 INVALID_CALL_ID`) | — | 🟢 |
 | FE-05 | FA-01 | La convocatoria está cerrada manualmente | Rechaza la modificación (`409 CALL_CLOSED`) | RN-23 | 🟢 |
-| FE-06 | FA-02 | La convocatoria ya está cerrada manualmente | Rechaza (`409 CALL_ALREADY_CLOSED`) | RN-23 | 🟢 |
+| FE-06 | FA-01 a FA-03 | La convocatoria ya fue sorteada | Rechaza cualquier modificación (también la del título), el cierre y la reapertura (`409 DRAW_ALREADY_EXECUTED`). La eliminación la impide FE-08, porque una convocatoria sorteada tiene solicitudes | RN-19 | 🟢 Se valida antes que FE-05 |
 | FE-07 | FA-03 | La convocatoria no está cerrada manualmente | Rechaza (`409 CALL_NOT_CLOSED`) | RN-23 | 🟢 |
 | FE-08 | FA-04 | La convocatoria tiene solicitudes | Rechaza la eliminación (`409 CALL_HAS_APPLICATIONS`) | RN-24 | 🟢 |
 | FE-09 | 3 | El usuario no tiene `ROLE_ADMIN` | Rechaza la escritura (`403`); el frontend oculta las rutas de administración | [RNF-02](../03-atributos-de-calidad-y-rnf.md) | 🟢 |

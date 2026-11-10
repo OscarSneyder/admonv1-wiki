@@ -5,9 +5,9 @@
 | Convocatoria | `Call` (back) / `Convocation` (front) | Proceso abierto durante un rango de fechas con un número de cupos (`totalSlots`) para parqueaderos comunales. Estados: `SCHEDULED`, `OPEN`, `CLOSED`. |
 | Cupos | `Call.totalSlots` | Número fijo de parqueaderos comunales que se asignan en una convocatoria. No cambia al registrar, aprobar o rechazar solicitudes, ni al ejecutar el sorteo. |
 | Asignación directa | `directAssignment` | Resultado del sorteo cuando las solicitudes aprobadas son iguales o menos que los cupos: todas quedan `SELECTED` y no hay lista de espera. |
-| Solicitud (en la implementación v1: Postulación) | `Application` | Solicitud de un residente, para su unidad privada (apartamento), a una convocatoria. Número con formato `POST-<UUID>`. |
+| Solicitud (en la implementación v1: Postulación) | `Application` | Solicitud de un residente, para su unidad privada (apartamento), a una convocatoria. Número legible y consecutivo por convocatoria, con formato `POS-{convocatoria}-{consecutivo}` (p. ej. `POS-1-0001`, RN-39). |
 | Residente | `User` con `ROLE_RESIDENT` | Usuario asociado a un apartamento que puede postularse. |
-| Administrador | `User` con `ROLE_ADMIN` | Rol definido en los datos semilla; ✏️ funciones por definir. |
+| Administrador | `User` con `ROLE_ADMIN` | Usuario sin unidad privada que publica y administra convocatorias, revisa solicitudes y ejecuta el sorteo. No se postula ni ve las opciones del residente (RN-40). |
 | Apartamento | `Apartment` | Unidad habitacional perteneciente a una torre. Máximo una postulación por convocatoria. |
 | Torre | `Tower` | Agrupación de apartamentos. |
 | Documento | `Document` | Archivo PDF del vehículo o del residente almacenado en S3. Estados: `PENDING`, `UPLOADED`, `FAILED`. |

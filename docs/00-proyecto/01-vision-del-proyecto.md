@@ -24,10 +24,10 @@ El software es un **habilitador necesario** del servicio: la necesidad exige con
 
 | Necesidad de control | Cómo la atiende el producto | Referencia |
 |----------------------|-----------------------------|------------|
-| Una sola solicitud por unidad privada y convocatoria | Regla de negocio (⚠️ la restricción única en base de datos se retiró el 2026-10-02, [R-09](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)) | [RN-04](../01-modelo-de-negocio/04-reglas-de-negocio.md), [EUV-Q-03](../04-modelo-de-validacion/euv/EUV-Q-03-postulacion-duplicada.md) |
+| Una sola solicitud por unidad privada y convocatoria | Regla de negocio, validada con la convocatoria bloqueada (la restricción única en base de datos se retiró el 2026-10-02; [R-09](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md) mitigado) | [RN-04](../01-modelo-de-negocio/04-reglas-de-negocio.md), [EUV-Q-03](../04-modelo-de-validacion/euv/EUV-Q-03-postulacion-duplicada.md) |
 | Documentos obligatorios del vehículo completos y válidos | Validación de tipo, tamaño y obligatoriedad | [RN-06 a RN-11](../01-modelo-de-negocio/04-reglas-de-negocio.md), [EUV-04](../04-modelo-de-validacion/euv/EUV-04-cargar-documentos.md) |
 | Cupos y periodicidad propios de cada conjunto | Parámetros definidos en cada convocatoria | [RN-14, RN-15](../01-modelo-de-negocio/04-reglas-de-negocio.md#reglas-identificadas-por-implementar), [C.U-01](../02-modelo-de-capacidades/casos-de-uso/C.U-01-publicar-convocatoria.md) |
-| Estado y trazabilidad de cada solicitud hasta la asignación | Estados de la solicitud, número único `POST-<UUID>` y sorteo registrado | [RN-13](../01-modelo-de-negocio/04-reglas-de-negocio.md), [C.U-07](../02-modelo-de-capacidades/casos-de-uso/C.U-07-aceptar-solicitud.md), [C.U-08](../02-modelo-de-capacidades/casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) |
+| Estado y trazabilidad de cada solicitud hasta la asignación | Estados de la solicitud, número único `POS-{convocatoria}-{consecutivo}` y sorteo registrado | [RN-13](../01-modelo-de-negocio/04-reglas-de-negocio.md), [C.U-07](../02-modelo-de-capacidades/casos-de-uso/C.U-07-aceptar-solicitud.md), [C.U-08](../02-modelo-de-capacidades/casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) |
 
 ## 4. Valor esperado y evidencia de mejora
 | ID | Valor esperado | Elemento del modelo | Evidencia de mejora (medida) | EUV | Estado |
@@ -63,7 +63,7 @@ La RBS cubre de extremo a extremo el escenario ESN-01 ([RBS](../06-direccion-y-p
 | Negocio | Reglas del sorteo (criterios, prioridades, lista de espera) | TJ-03 | [C.U-08](../02-modelo-de-capacidades/casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) |
 | Negocio | Criterios con que el administrador acepta o rechaza una solicitud | TJ-02 | [C.U-07](../02-modelo-de-capacidades/casos-de-uso/C.U-07-aceptar-solicitud.md) |
 | Técnica | Causa de la tasa de fallo del 16,7 % bajo 300 usuarios concurrentes | TJ-01 | [EUV-Q-01](../04-modelo-de-validacion/euv/EUV-Q-01-concurrencia-postulaciones.md) |
-| Técnica | La consulta de solicitudes no se restringe al residente autenticado (R-01 parcial; la creación ya usa el JWT) | TJ-01 | [R-01](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md) |
+| Técnica | El detalle de una solicitud no se restringe al residente autenticado (R-01 parcial; la creación y el listado ya usan el JWT) | TJ-01 | [R-01](../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md) |
 | Técnica | Persistencia definitiva: H2 actual frente a PostgreSQL previsto | ✏️ | [ADR-0005](../03-modelo-de-arquitectura/04-decisiones-adr/ADR-0005-persistencia-jpa-h2-postgresql.md) |
 
 ## 7. Primera tajada y RBS

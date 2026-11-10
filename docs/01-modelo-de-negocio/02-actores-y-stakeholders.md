@@ -9,8 +9,8 @@
 ## Actores del sistema
 | Actor | Tipo | Descripción | Interacciones |
 |-------|------|-------------|---------------|
-| Residente | Humano primario | Usuario con `ROLE_RESIDENT` y unidad privada asociada | Login, consultar convocatorias, cargar documentos, presentar una solicitud, consultar solicitudes |
-| Administrador | Humano | Usuario con `ROLE_ADMIN` | Publicar convocatorias, consultar y aceptar solicitudes, ejecutar el sorteo de cupos y configurar zonas comunes (C.U-01, C.U-04, C.U-07, C.U-08, C.U-09); sin funcionalidades implementadas en v1 |
+| Residente | Humano primario | Usuario con `ROLE_RESIDENT` y unidad privada asociada | Login, consultar convocatorias, cargar documentos, presentar, consultar y cancelar solicitudes, consultar el resultado de sus solicitudes en el sorteo (C.U-02, C.U-03, C.U-04, C.U-06) |
+| Administrador | Humano | Usuario con `ROLE_ADMIN` | Publicar y administrar convocatorias, revisar (aceptar o rechazar) solicitudes y ejecutar el sorteo de cupos (C.U-01, C.U-07, C.U-08), implementados en v1; configurar zonas comunes (C.U-09) por implementar. No tiene las opciones del residente: *Convocatorias* ni *Mis Postulaciones* (RN-40) |
 | AWS S3 | Sistema externo | Almacenamiento de documentos | Recibe archivos vía URL prefirmada; el backend verifica su existencia |
 | Pipeline AWS | Sistema externo | CodePipeline / CodeBuild / CodeDeploy | Construye, prueba y despliega el backend |
 

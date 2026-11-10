@@ -16,6 +16,8 @@
 | Requisitos funcionales relacionados | RF-12, RF-13 |
 | Estado | 🟡 Implementado, excepto la notificación a los residentes (paso 12, MEC-05) |
 
+> **Implementación v1** (revisión del código de la rama `fix/integracion-aprobacion-sorteo`, 2026-11-09). Backend: `DrawController` (`GET /api/calls/{callId}/draw/preview`, `POST /api/calls/{callId}/draw`, `GET /api/calls/{callId}/draw`), `DrawResultsController` (`GET /api/calls/{callId}/draw/results` y `/hash`), `AdminDrawController` (`GET /api/admin/calls/{callId}/draw/export`), `DrawTransactions` y `DrawAlgorithm` (`FISHER_YATES_SHA256_V1`). Frontend: `CallDrawPage` (`/admin/convocations/:id/draw`), `CallDrawResultsPage` (`/admin/calls/:id/draw/results`) y `ResidentDrawResultsPage` (`/calls/:id/draw/results`).
+
 > **Decisiones del equipo (2026-11-07):**
 > - Participan todas las solicitudes en estado `APPROVED`, y solo ellas.
 > - El sorteo se ejecuta solo con la convocatoria cerrada y **no se puede repetir**.
@@ -47,18 +49,18 @@
 | Paso | Actor / Sistema | Acción |
 |:----:|-----------------|--------|
 | 1 | Administrador | Ingresa a la administración de convocatorias y selecciona una convocatoria cerrada |
-| 2 | Sistema | Muestra el resumen previo al sorteo: número de cupos, número de solicitudes `APPROVED` participantes y número de solicitudes por estado |
+| 2 | Sistema | Muestra el resumen previo al sorteo: número de cupos, número de solicitudes `APPROVED` participantes y número de solicitudes por estado (`GET /api/calls/{callId}/draw/preview`) |
 | 3 | Administrador | Elige ejecutar el sorteo |
 | 4 | Sistema | Pide confirmación e informa que el sorteo es definitivo y no se puede repetir |
 | 5 | Administrador | Confirma la ejecución |
-| 6 | Sistema | Valida que la convocatoria exista, esté cerrada y no tenga un sorteo previo (RN-18, RN-19) |
+| 6 | Sistema | Bloquea la convocatoria (lock pesimista) y valida que exista, esté cerrada y no tenga un sorteo previo (RN-18, RN-19) (`POST /api/calls/{callId}/draw`) |
 | 7 | Sistema | Verifica que no haya solicitudes `PENDING_VALIDATION` (RN-37), obtiene las `APPROVED` y verifica que haya al menos una (RN-17) |
-| 8 | Sistema | Ordena las solicitudes participantes por número de solicitud para fijar la lista de entrada, y calcula su huella digital (*hash*) |
-| 9 | Sistema | Genera una semilla aleatoria segura y, con ella, obtiene un orden aleatorio de los participantes (RN-21) |
+| 8 | Sistema | Ordena las solicitudes participantes por número de solicitud (orden alfabético del texto) para fijar la lista de entrada, y calcula su huella digital (*hash*) |
+| 9 | Sistema | Genera una semilla aleatoria segura (`SecureRandom`) y, con ella, obtiene un orden aleatorio de los participantes con Fisher-Yates, usando SHA-256 de la semilla y el paso como fuente de cada índice (RN-21) |
 | 10 | Sistema | Asigna a cada solicitud su posición; las posiciones 1 a *cupos* pasan a `SELECTED` y las demás a `NOT_SELECTED` (RN-20) |
 | 11 | Sistema | Registra el sorteo y su auditoría en la misma transacción que el cambio de estado de las solicitudes (RN-21) |
 | 12 | Sistema | Notifica el resultado a los residentes participantes ([MEC-05](../../03-modelo-de-arquitectura/03-mecanismos-de-diseno/README.md)). 🔴 No implementado |
-| 13 | Sistema | Muestra al administrador el resultado: lista de seleccionados y lista de espera en orden, con los datos de auditoría. Fin |
+| 13 | Sistema | Muestra al administrador el resultado: lista de seleccionados y lista de espera en orden, con los datos de auditoría. Fin (`GET /api/calls/{callId}/draw`) |
 
 ## Flujos alternativos
 | Código | Paso de origen | Condición | Acción | Retorno |
@@ -66,6 +68,8 @@
 | FA-02 | 5 | El administrador no confirma | El sistema no ejecuta el sorteo ni modifica datos | Paso 2 |
 | FA-03 | 1 | La convocatoria ya tiene un sorteo ejecutado | El sistema muestra el resultado y la auditoría registrados, sin opción de ejecutar | Paso 13 |
 | FA-04 | 2 | Las solicitudes `APPROVED` son iguales o menos que los cupos (asignación directa, RN-17) | El sistema informa que hay cupos para todas y ofrece *Asignar cupos*. Al confirmar, sigue el mismo flujo y todas las solicitudes quedan `SELECTED`, sin lista de espera; los cupos sobrantes quedan registrados como no asignados | Paso 3 |
+| FA-05 | 13 | El administrador desea exportar el resultado | El sistema muestra el listado de solicitudes sorteadas (residente, unidad privada, resultado, estado y posición) con la huella de integridad, y descarga el resultado en CSV | Fin |
+| FA-06 | — | Un residente consulta el resultado de una convocatoria sorteada ([C.U-02](C.U-02-consultar-convocatoria.md), FA-02) | El sistema muestra solo las solicitudes del residente, con su resultado y posición, y la huella de integridad del resultado completo, sin acciones de administración. Si no participó, informa que no tiene postulaciones en el sorteo | Fin |
 
 ## Flujos de excepción
 | Código | Paso | Condición | Respuesta del sistema | Regla |
@@ -77,6 +81,8 @@
 | FE-05 | 3 | El usuario no tiene `ROLE_ADMIN` | Rechaza la petición (`403`). Fin | [RNF-02](../03-atributos-de-calidad-y-rnf.md) |
 | FE-06 | 11 | Falla el registro del sorteo | Revierte toda la operación: ninguna solicitud cambia de estado y no queda sorteo registrado. Fin | RN-21 |
 | FE-07 | 2, 7 | Hay solicitudes `PENDING_VALIDATION` | Deshabilita la ejecución e informa cuántas faltan por revisar; si llega la petición, la rechaza (`409 APPLICATIONS_PENDING_VALIDATION`). Fin | RN-37 |
+| FE-08 | 1, 13, FA-05, FA-06 | Se consulta el resultado de una convocatoria sin sorteo | Rechaza (`404 DRAW_NOT_FOUND`). Fin | RN-19 |
+| FE-09 | 2, 6, 13 | El identificador de la convocatoria es nulo o menor que 1 | Rechaza (`400 INVALID_CALL_ID`). Fin | — |
 
 > FE-04 evita un registro definitivo sin participantes, que cerraría la convocatoria para siempre sin asignar ningún cupo.
 
@@ -119,12 +125,12 @@ Las solicitudes `REJECTED` y `CANCELLED` no participan y su estado no cambia.
 ## Puntos por confirmar
 | Punto | Propuesta en esta especificación |
 |-------|-----------------------------------|
-| Visibilidad del resultado para el residente | Ve su estado y su posición; no ve los datos de otros participantes |
-| Publicación de la auditoría | Visible para el administrador; ✏️ definir si se publica a los residentes |
+| Visibilidad del resultado para el residente | ✅ Decidido (2026-11-09): por ahora el residente solo ve sus propios datos (estado, resultado y posición); no ve a los demás participantes. `GET /api/calls/{callId}/draw/results` devuelve todas las filas solo a `ROLE_ADMIN` ([R-11](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md), resuelto) |
+| Publicación de la auditoría | La auditoría completa (semilla, lista de entrada y algoritmo) solo es visible para el administrador; el residente ve la huella de integridad del resultado (`/draw/hash`). ✏️ Definir si se publica la auditoría completa |
 
 ## EUV asociados
 | EUV | Flujo que demuestra | Estado |
 |-----|---------------------|--------|
-| ✏️ EUV por crear · Ejecutar sorteo | Flujo básico, FA-03, FA-04, FE-02, FE-03, FE-04, FE-07 | Pendiente |
-| ✏️ EUV-Q por crear · Sorteo único bajo concurrencia | FE-03 con ejecuciones simultáneas | Pendiente |
-| ✏️ EUV-Q por crear · Reproducibilidad del sorteo | RN-21 | Pendiente |
+| ✏️ EUV por crear · Ejecutar sorteo | Flujo básico, FA-03, FA-04, FE-02, FE-03, FE-04, FE-07 | Pendiente. `DrawIntegrationTest` (25 pruebas) cubre el flujo básico y las excepciones del backend |
+| ✏️ EUV-Q por crear · Sorteo único bajo concurrencia | FE-03 con ejecuciones simultáneas | Pendiente. `DrawConcurrencyTest` lo comprueba a nivel de servicio |
+| ✏️ EUV-Q por crear · Reproducibilidad del sorteo | RN-21 | Pendiente. `DrawAlgorithmTest` (10 pruebas) comprueba que la misma entrada y semilla producen el mismo orden |

@@ -19,6 +19,7 @@
 | A1 | Credenciales inválidas | ⚠️ confirmar código HTTP y mensaje |
 | A2 | Usuario deshabilitado | ⚠️ confirmar |
 | A3 | Ruta protegida sin token | `ProtectedRoute` redirige a `/login` |
+| A4 | Usuario sin el rol que exige la ruta (p. ej. el administrador en `/convocations` o `/mis-postulaciones`, o un residente en `/admin/...`) | `ProtectedRoute` redirige a `/`; el menú solo muestra las opciones del rol ([RN-40](../../01-modelo-de-negocio/04-reglas-de-negocio.md)) |
 
 ## Criterios de aceptación
 - **Dado** un residente registrado, **cuando** envía credenciales válidas, **entonces** recibe HTTP 200 y un token.

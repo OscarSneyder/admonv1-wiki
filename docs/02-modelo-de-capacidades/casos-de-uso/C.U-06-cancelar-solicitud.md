@@ -14,22 +14,22 @@
 | Requisitos funcionales relacionados | RF-14 |
 | Estado | 🟢 Implementado |
 
-> **Fuente de los flujos:** implementación v1. Backend: `PATCH /api/applications/{applicationId}/cancel` (`ApplicationServiceImpl.cancelApplication`). Frontend: botón *Cancelar postulación* y modal de confirmación en `/applications/:id`. Revisión del código de `develop`: 2026-11-07.
+> **Fuente de los flujos:** implementación v1. Backend: `PATCH /api/applications/{applicationId}/cancel` (`ApplicationServiceImpl.cancelApplication`). Frontend: botón *Cancelar postulación* y modal de confirmación en `/applications/:id`. Revisión del código de la rama `fix/integracion-aprobacion-sorteo`: 2026-11-09.
 
 ## Precondiciones
-1. El residente inició sesión ([EUV-01](../../04-modelo-de-validacion/euv/EUV-01-iniciar-sesion.md)).
+1. El residente inició sesión con `ROLE_RESIDENT` ([EUV-01](../../04-modelo-de-validacion/euv/EUV-01-iniciar-sesion.md)). El administrador no tiene acceso a las opciones del residente ([RN-40](../../01-modelo-de-negocio/04-reglas-de-negocio.md)).
 2. El residente tiene una solicitud en estado `PENDING_VALIDATION`.
-3. La fecha actual está dentro del periodo de la convocatoria.
+3. La convocatoria está abierta: la fecha actual está dentro de su periodo y no se cerró manualmente ([RN-28](../../01-modelo-de-negocio/04-reglas-de-negocio.md)).
 
 ## Postcondiciones
 1. La solicitud queda en estado `CANCELLED`.
-2. La unidad privada puede volver a presentar una solicitud en la misma convocatoria, porque [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) no cuenta las solicitudes `CANCELLED`. Para permitirlo, este mismo commit retiró la restricción única `uk_application_apartment_call` (ver [R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md)).
+2. La unidad privada puede volver a presentar una solicitud en la misma convocatoria, porque [RN-04](../../01-modelo-de-negocio/04-reglas-de-negocio.md) no cuenta las solicitudes `CANCELLED`. Para permitirlo, este mismo commit retiró la restricción única `uk_application_apartment_call`; la unicidad la garantiza ahora el bloqueo de la convocatoria al registrar ([R-09](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md), mitigado). La solicitud nueva recibe un número consecutivo nuevo ([RN-39](../../01-modelo-de-negocio/04-reglas-de-negocio.md)).
 
 ## Flujo básico
 | Paso | Actor / Sistema | Acción | Estado v1 |
 |:----:|-----------------|--------|-----------|
 | 1 | Residente | Consulta el detalle de su solicitud ([C.U-04](C.U-04-consultar-solicitud.md)) | 🟢 `/applications/:id` |
-| 2 | Sistema | Muestra la opción *Cancelar postulación* si la solicitud está `PENDING_VALIDATION` y la convocatoria está dentro de su periodo | 🟢 |
+| 2 | Sistema | Muestra la opción *Cancelar postulación* si la solicitud está `PENDING_VALIDATION` y la convocatoria está abierta (estado derivado `OPEN`: dentro de sus fechas, zona America/Bogota, y sin cierre manual) | 🟢 Usa `callStatus` del detalle de la solicitud |
 | 3 | Residente | Elige cancelar | 🟢 |
 | 4 | Sistema | Pide confirmación | 🟢 Modal de confirmación |
 | 5 | Residente | Confirma | 🟢 |
@@ -44,10 +44,10 @@
 ## Flujos de excepción
 | Código | Paso | Condición | Respuesta del sistema | Regla | Estado v1 |
 |--------|:----:|-----------|-----------------------|-------|-----------|
-| FE-01 | 6 | La solicitud no existe | Rechaza (`APPLICATION_NOT_FOUND`). Fin | — | 🟢 |
-| FE-02 | 6 | La solicitud pertenece a otro residente | Rechaza (`APPLICATION_FORBIDDEN`). Fin | RN-26 | 🟢 El residente se toma del JWT |
-| FE-03 | 6 | La solicitud no está `PENDING_VALIDATION` | Rechaza (`APPLICATION_CANNOT_BE_CANCELLED`). Fin | RN-27 | 🟢 |
-| FE-04 | 6 | La fecha actual está fuera del periodo de la convocatoria | Rechaza (`APPLICATION_PERIOD_CLOSED`). Fin | RN-28 | 🟢 |
+| FE-01 | 6 | La solicitud no existe | Rechaza (`404 APPLICATION_NOT_FOUND`). Fin | — | 🟢 |
+| FE-02 | 6 | La solicitud pertenece a otro residente | Rechaza (`403 APPLICATION_FORBIDDEN`). Fin | RN-26 | 🟢 El residente se toma del JWT |
+| FE-03 | 6 | La solicitud no está `PENDING_VALIDATION` | Rechaza (`409 APPLICATION_CANNOT_BE_CANCELLED`). Fin | RN-27 | 🟢 |
+| FE-04 | 6 | La convocatoria no está abierta: la fecha actual está fuera de su periodo o se cerró manualmente | Rechaza (`409 APPLICATION_PERIOD_CLOSED`). Fin | RN-28 | 🟢 Decisión del equipo (2026-11-09): el cierre manual bloquea los cambios en las solicitudes ya registradas |
 
 ## Reglas de negocio aplicables
 RN-04 y RN-26 a RN-28 ([Reglas de negocio](../../01-modelo-de-negocio/04-reglas-de-negocio.md)).

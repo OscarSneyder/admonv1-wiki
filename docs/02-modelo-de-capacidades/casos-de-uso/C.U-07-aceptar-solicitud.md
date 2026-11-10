@@ -12,7 +12,7 @@
 | Objetivo del actor | Validar manualmente los documentos que cada residente cargó en su solicitud y decidir cuáles solicitudes participan en el sorteo de cupos |
 | Resultado observable | Solicitud en estado `APPROVED` (participa en el sorteo) o `REJECTED` (con su motivo), con el registro de quién la revisó y cuándo |
 | Requisitos funcionales relacionados | RF-15, RF-16, RF-17 |
-| Estado | 🟡 Implementado, con limitaciones en el listado (FA-04 y [D-11](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md#deuda-técnica)) |
+| Estado | 🟢 Implementado (falta la notificación al residente, fuera del alcance) |
 
 > **Fuente de los flujos:** implementación v1 (CU 1.2.4 en el código). Backend: `AdminApplicationServiceImpl`, `AdminApplicationController`, `ApplicationController` y `DocumentServiceImpl.generateReadUrl`. Frontend: `AdminApplicationsPage`, `AdminApplicationDetailPage` y `AdminRejectModal`. Revisión del código de la rama `fix/integracion-aprobacion-sorteo`: 2026-11-09. Los comentarios del backend citan estas reglas con otra numeración; la de referencia es la de esta wiki.
 
@@ -37,13 +37,13 @@ La revisión se puede hacer con la convocatoria abierta o cerrada, pero debe ter
 | Paso | Actor / Sistema | Acción | Estado v1 |
 |:----:|-----------------|--------|-----------|
 | 1 | Administrador | Ingresa a *Revisar Postulaciones* | 🟢 `/admin/applications`, visible solo para `ROLE_ADMIN` |
-| 2 | Sistema | Muestra las solicitudes, de la más reciente a la más antigua, con número, estado, residente, unidad privada, convocatoria, cantidad de documentos, motivo del rechazo y resultado del sorteo | 🟡 `GET /api/admin/applications`. La pantalla solo pide las primeras 50 y no tiene paginación ([D-11](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md#deuda-técnica)) |
+| 2 | Sistema | Muestra las solicitudes, de la más reciente a la más antigua, con número, estado, residente, unidad privada, convocatoria, cantidad de documentos, motivo del rechazo y resultado del sorteo, paginadas de 20 en 20 (*Mostrando 21–40 de N*, botones *Anterior* y *Siguiente*) | 🟢 `GET /api/admin/applications?page=&size=`. Filtros y página se guardan en la URL (`?callId=&status=&page=`), así que al volver del detalle se conserva la posición. D-11 resuelto (2026-11-09) |
 | 3 | Administrador | Elige *Ver detalle* en una solicitud | 🟢 `/admin/applications/:id`. Las acciones de revisión solo están en el detalle |
 | 4 | Sistema | Muestra los datos de la solicitud, la convocatoria, el residente, la unidad privada, los documentos y la auditoría de la revisión | 🟢 `GET /api/admin/applications/{applicationId}` |
 | 5 | Administrador | Previsualiza y valida los documentos del vehículo y del residente ([RN-36](../../01-modelo-de-negocio/04-reglas-de-negocio.md)) | 🟢 `GET /api/admin/applications/{applicationId}/documents/{documentId}/url`; se abre en una pestaña nueva ([RN-35](../../01-modelo-de-negocio/04-reglas-de-negocio.md)) |
 | 6 | Administrador | Elige *Aceptar* | 🟢 Botón habilitado solo si la solicitud está `PENDING_VALIDATION` y la convocatoria no se ha sorteado; no pide confirmación |
 | 7 | Sistema | Valida la operación ([RN-31](../../01-modelo-de-negocio/04-reglas-de-negocio.md), [RN-34](../../01-modelo-de-negocio/04-reglas-de-negocio.md)), marca la solicitud `APPROVED` y registra la auditoría | 🟢 `PATCH /api/applications/{applicationId}/accept` |
-| 8 | Sistema | Regresa al listado de solicitudes. Fin | 🟢 |
+| 8 | Sistema | Regresa al listado de solicitudes, con los filtros y la página desde los que se abrió el detalle. Fin | 🟢 |
 
 ## Flujos alternativos
 | Código | Paso de origen | Condición | Acción | Retorno | Estado v1 |
@@ -51,7 +51,7 @@ La revisión se puede hacer con la convocatoria abierta o cerrada, pero debe ter
 | FA-01 | 6 | El administrador decide rechazar una solicitud `PENDING_VALIDATION` | Elige *Rechazar* e ingresa el motivo, que es obligatorio y el residente podrá consultar. Al confirmar, el sistema marca la solicitud `REJECTED` y registra la auditoría | Paso 8 | 🟢 `PATCH /api/applications/{applicationId}/reject` |
 | FA-02 | 6 | El administrador decide revocar una solicitud `APPROVED` | Sigue el mismo flujo de FA-01: la solicitud pasa de `APPROVED` a `REJECTED` y deja de participar en el sorteo | Paso 8 | 🟢 Mismo endpoint |
 | FA-03 | FA-01, FA-02 | El administrador no confirma el rechazo | Cierra el modal sin cambios | Paso 4 | 🟢 |
-| FA-04 | 2 | El administrador filtra el listado por estado o por convocatoria | El sistema muestra las solicitudes que cumplen los filtros o, si no hay ninguna, informa que no hay postulaciones | Paso 2 | 🟡 El filtro por estado funciona. El API admite `callId`, pero la lista desplegable de convocatorias no tiene opciones ([D-11](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md#deuda-técnica)) |
+| FA-04 | 2 | El administrador filtra el listado por estado o por convocatoria | El sistema muestra las solicitudes que cumplen los filtros, desde la primera página, o, si no hay ninguna, informa que no hay postulaciones | Paso 2 | 🟢 La lista de convocatorias se carga de `GET /api/calls`. Si la página guardada ya no existe (por ejemplo, tras aprobar con un filtro activo), se muestra la última disponible |
 | FA-05 | 4 | La solicitud ya no se puede revisar, por su estado o porque la convocatoria se sorteó | El sistema muestra el detalle con las acciones deshabilitadas | Paso 2 | 🟢 |
 
 ## Flujos de excepción

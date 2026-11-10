@@ -16,11 +16,17 @@ Fuente: entidades JPA en `model/` (esquema generado con `ddl-auto=create`) y dat
 ## Datos semilla (`data.sql`)
 | Entidad | Cantidad | Detalle |
 |---------|----------|---------|
-| Torres | 1 | `Torre 1` |
-| Unidades privadas | 800 | números 101 … 900 |
+> El arranque simula una **base de datos nueva**: solo se cargan catálogos y cuentas. Convocatorias, solicitudes y documentos se crean desde la aplicación (actualizado el 2026-11-09). Contraseña de todos los usuarios: `123456`.
+
+| Entidad | Cantidad | Detalle |
+|---------|----------|---------|
+| Torres | 3 | `Torre 1`, `Torre 2`, `Torre 3` |
+| Unidades privadas | 800 | Torre 1, números 101 … 900 |
 | Roles | 2 | `ROLE_ADMIN`, `ROLE_RESIDENT` |
-| Usuarios | 1 | `residente@test.com` (unidad privada 1, `ROLE_RESIDENT`) |
-| Convocatorias | 2 | 200 y 180 cupos, `OPEN` |
+| Usuarios | 27 | `admin@test.com` (`ROLE_ADMIN`, sin unidad privada); `residente@test.com` (unidad privada 101, usado por `test_api.py`); 25 residentes de prueba: `prueba01` … `prueba20@test.com` (una unidad privada cada uno, 109 … 128) y `prueba01b` … `prueba05b@test.com` (comparten unidad privada con `prueba01` … `prueba05`, para probar RN-04). Ninguno es `simulated` |
+| Convocatorias, solicitudes, documentos | 0 | Se crean desde la aplicación |
+
+Como no hay usuarios `simulated`, la preinscripción automática (`simulation.auto-enroll`, desactivada por defecto) no tiene efecto con estos datos.
 
 ## Pendientes
 - ✏️ Diccionario de datos detallado (se puede exportar desde la consola H2 en `/h2-console`).

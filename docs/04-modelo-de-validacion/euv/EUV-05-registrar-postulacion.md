@@ -5,12 +5,12 @@
 | Requisito | RF-07 |
 | Actor | Residente autenticado |
 | Precondiciones | Elegible (EUV-03) · documentos obligatorios en `UPLOADED` (EUV-04) |
-| Postcondición | `Application` en estado `PENDING_VALIDATION`, número `POST-<UUID>`, documentos vinculados |
+| Postcondición | `Application` en estado `PENDING_VALIDATION`, número `POS-{convocatoria}-{consecutivo}` (RN-39), documentos vinculados |
 | Pantalla | `/convocations/:id/apply` → `CreateApplicationPage` (`ApplicationStepper`) |
-| Endpoint | `POST /api/applications` — cuerpo `{callId, residentId, documentIds[]}` |
+| Endpoint | `POST /api/applications` — cuerpo `{callId, documentIds[]}` |
 | Componentes | Front: `useCreateApplication`, `CreateApplication`, `HttpApplicationRepository` · Back: `ApplicationController`, `ApplicationServiceImpl`, `ApplicationRepository`, `DocumentRepository`, `UserRepository`, `CallRepository` |
 
-> **Seguridad:** el backend toma el residente del JWT; el `residentId` que el frontend aún envía desde `RESIDENT.id` (`src/constants.js`) se ignora. Ver [R-01](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md).
+> **Seguridad:** el backend toma el residente del JWT; el cuerpo no incluye el residente. Ver [R-01](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md).
 
 ## Flujo principal
 > ✏️ **Diagrama por agregar:** `![Flujo de registro de postulación](../../assets/imagenes/esc-f-05-registrar-postulacion.png)`

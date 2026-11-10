@@ -11,10 +11,10 @@
 | [C.U-01](casos-de-uso/C.U-01-publicar-convocatoria.md) | Publicar convocatoria | Convocatorias | Administrador | ESN-01 · paso 1 | RF-10 | 🟡 Implementado sin periodo de vigencia (RN-15) |
 | [C.U-02](casos-de-uso/C.U-02-consultar-convocatoria.md) | Consultar convocatoria | Solicitudes | Residente | ESN-01 · paso 3 | RF-02, RF-03 | 🟢 Implementado |
 | [C.U-03](casos-de-uso/C.U-03-registrar-solicitud.md) | Registrar solicitud | Solicitudes | Residente | ESN-01 · paso 4 | RF-04, RF-05, RF-06, RF-07 | 🟡 Implementado parcialmente |
-| [C.U-04](casos-de-uso/C.U-04-consultar-solicitud.md) | Consultar solicitud | Solicitudes · Convocatorias | Residente, Administrador | — | RF-08, RF-09 (Residente) | 🟡 Implementado para Residente |
+| [C.U-04](casos-de-uso/C.U-04-consultar-solicitud.md) | Consultar solicitud | Solicitudes · Convocatorias | Residente, Administrador | — | RF-08, RF-09 (Residente) | 🟡 Implementado para Residente; falta restringir el detalle al dueño (R-01) |
 | [C.U-05](casos-de-uso/C.U-05-ajustar-solicitud.md) | Ajustar solicitud | Solicitudes | Residente | — | — | 🔴 No implementado |
 | [C.U-06](casos-de-uso/C.U-06-cancelar-solicitud.md) | Cancelar solicitud | Solicitudes | Residente | — | RF-14 | 🟢 Implementado (fuera de la RBS) |
-| [C.U-07](casos-de-uso/C.U-07-aceptar-solicitud.md) | Aceptar solicitud | Convocatorias | Administrador | ESN-01 · paso 6 | RF-15, RF-16, RF-17 | 🟡 Implementado, con limitaciones en el listado (D-11) |
+| [C.U-07](casos-de-uso/C.U-07-aceptar-solicitud.md) | Aceptar solicitud | Convocatorias | Administrador | ESN-01 · paso 6 | RF-15, RF-16, RF-17 | 🟢 Implementado |
 | [C.U-08](casos-de-uso/C.U-08-ejecutar-sorteo-de-cupos.md) | Ejecutar sorteo de cupos | Convocatorias | Administrador | ESN-01 · paso 7 | RF-12, RF-13 | 🟡 Implementado sin notificación (MEC-05) |
 | [C.U-09](casos-de-uso/C.U-09-configurar-zona-comun.md) | Configurar zona común | Configuraciones | Administrador | — | — | 🔴 No implementado |
 

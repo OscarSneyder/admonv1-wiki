@@ -33,20 +33,27 @@ Estilo: **Clean Architecture por *features*** ([ADR-0002](../04-decisiones-adr/A
 > ✏️ **Diagrama por agregar:** `![Componentes por feature](../../assets/imagenes/frontend-componentes-por-feature.png)`
 
 ### Rutas
-| Ruta | Página | Protegida |
-|------|--------|:---------:|
-| `/login` | `LoginPage` | ❌ |
-| `/` | `HomePage` | ✅ |
-| `/convocations` | `ConvocationsPage` | ✅ |
-| `/convocations/:id` | `ConvocationDetailPage` | ✅ |
-| `/convocations/:id/apply` | `CreateApplicationPage` | ✅ |
-| `/mis-postulaciones` | `ApplicationsPage` | ✅ |
-| `/applications/:id` | `ApplicationDetailPage` | ✅ |
+`ProtectedRoute` redirige a `/login` sin token y a `/` si el usuario no tiene el rol que exige la ruta. El `Navbar` muestra solo las opciones del rol de la sesión ([RN-40](../../01-modelo-de-negocio/04-reglas-de-negocio.md)).
+
+| Ruta | Página | Acceso |
+|------|--------|--------|
+| `/login` | `LoginPage` | Público |
+| `/` | `HomePage` | Autenticado |
+| `/convocations` | `ConvocationsPage` | `ROLE_RESIDENT` |
+| `/convocations/:id` | `ConvocationDetailPage` | `ROLE_RESIDENT` |
+| `/convocations/:id/apply` | `CreateApplicationPage` | `ROLE_RESIDENT` |
+| `/mis-postulaciones` | `ApplicationsPage` | `ROLE_RESIDENT` |
+| `/applications/:id` | `ApplicationDetailPage` | `ROLE_RESIDENT` |
+| `/calls/:id/draw/results` | `ResidentDrawResultsPage` | `ROLE_RESIDENT` |
+| `/admin/convocations` · `/new` · `/:id/edit` | `AdminCallsPage`, `CreateCallPage`, `EditCallPage` | `ROLE_ADMIN` |
+| `/admin/convocations/:id/draw` | `CallDrawPage` | `ROLE_ADMIN` |
+| `/admin/calls/:id/draw/results` | `CallDrawResultsPage` | `ROLE_ADMIN` |
+| `/admin/applications` · `/:id` | `AdminApplicationsPage`, `AdminApplicationDetailPage` | `ROLE_ADMIN` |
 
 ### Componentes compartidos
 | Componente | Ubicación | Uso |
 |-----------|-----------|-----|
-| `Navbar` | `src/components/` | Navegación (oculta en `/login`) |
+| `Navbar` | `src/components/` | Navegación (oculta en `/login`). Residente: *Inicio*, *Convocatorias*, *Mis Postulaciones*. Administrador: *Inicio*, *Administrar Convocatorias*, *Gestionar Postulaciones* |
 | `Stepper` | `src/components/` | Pasos de la solicitud |
 | `Tooltip` | `src/components/` | Ayudas contextuales |
 | `UI` (`Loading`, `ErrorMessage`, …) | `src/components/` | Estados de carga y error |
@@ -54,5 +61,5 @@ Estilo: **Clean Architecture por *features*** ([ADR-0002](../04-decisiones-adr/A
 
 ### Hallazgos (ver [Riesgos y deuda](../../06-direccion-y-planeacion/05-riesgos-y-deuda-tecnica.md))
 - ✅ Resuelto: `ConvocationDetailPage` ya no importa infraestructura de la feature `applications` (D-05).
-- `src/constants.js` contiene un `RESIDENT` fijo (`id: 1`, nombre, unidad y estado "Paz y Salvo") que se muestra en la interfaz y se envía como `residentId`; el backend ignora ese valor al registrar (R-01).
+- `src/constants.js` expone `getCurrentResident()`, que arma los datos del residente (nombre, unidad privada y torre) a partir de la sesión guardada por el login (`AuthSession`). Solo el estado de cuenta "Paz y Salvo" sigue fijo, porque el backend no lo expone (RN-16). El frontend ya no envía `residentId`: el backend toma el residente del JWT.
 - Mapa de dependencias generado: `admonv1-frontend/graphify-out/graph.html`.
